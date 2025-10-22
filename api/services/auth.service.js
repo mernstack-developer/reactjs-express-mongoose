@@ -13,6 +13,7 @@ async function registerUser({ name, email, password }) {
 async function loginUser({ email, password }) {
   const user = await User.findOne({ email });
   if (!user) throw new Error('Invalid credentials');
+  if (!user.password) throw new Error('Invalid credentials');
   const ok = await bcrypt.compare(password, user.password);
   if (!ok) throw new Error('Invalid credentials');
 
