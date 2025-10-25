@@ -1,7 +1,9 @@
 .DS_Store
 .env
+/.vite/
 /node_modules/
 /client/node_modules/
 /api/node_modules/
 # React Router
 /.react-router/
+.vercel

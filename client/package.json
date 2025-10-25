@@ -3,6 +3,7 @@
   "private": true,
   "version": "2.0.2",
   "type": "module",
+  "proxy": "http://localhost:5000",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -50,6 +51,7 @@
     "vite": "^6.1.0",
     "vite-plugin-svgr": "^4.3.0"
   },
+ 
   "overrides": {
     "react-helmet-async": {
       "react": "^16.8.0 || ^17 || ^18 || ^19"
