@@ -18,7 +18,10 @@ import Blank from "./pages/Blank";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
-
+import UserList from './components/UserList';
+import GuestList from './components/GuestList';
+import AddGuestForm from './components/AddGuestForm';
+import AddUserForm from './components/AddUserForm';
 export default function App() {
   return (
     <>
@@ -28,7 +31,10 @@ export default function App() {
           {/* Dashboard Layout */}
           <Route element={<AppLayout />}>
             <Route index path="/" element={<Home />} />
-
+            <Route path="/users" element={<UserList />} />
+          <Route path="/guests" element={<GuestList />} />
+          <Route path="/add-guest" element={<AddGuestForm />} />
+          <Route path="/add-user" element={<AddUserForm />} />
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
             <Route path="/calendar" element={<Calendar />} />

@@ -1,9 +1,7 @@
-
-
 const express = require('express');
  const mongoose = require('mongoose');
   const userRoutes = require('./routes/user.routes');
-   const authRoutes = require('./routes/auth.routes');
+  const authRoutes = require('./routes/auth.routes');
  const dotenv = require('dotenv');
  dotenv.config();
 const app = express();
@@ -25,7 +23,6 @@ mongoose.connect(mongoUri, {
 //Example Mongoose Model (e.g., in a models/ folder)
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
-
 // A simple API route
 app.get('/api/greeting', (req, res) => {
   res.json({ message: 'Hello from the Express server!' });
@@ -38,3 +35,9 @@ if (process.env.NODE_ENV !== 'production') {
     console.log(`Server listening on port ${port}`);
   });
 }
+// For local development: Listen on port
+// if (process.env.NODE_ENV !== 'production') {
+//   app.listen(port, () => {
+//     console.log(`Server listening on port ${port}`);
+//   });
+// }

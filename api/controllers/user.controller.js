@@ -13,7 +13,7 @@ async function createUser(req, res) {
 async function getUsers(req, res) {
 	try {
 		const users = await userService.getUsers();
-		res.json(users);
+		res.json({ data: users });
 	} catch (err) {
 		console.error(err);
 		res.status(500).json({ error: err.message });
@@ -24,7 +24,7 @@ async function getUserById(req, res) {
 	try {
 		const user = await userService.getUserById(req.params.id);
 		if (!user) return res.status(404).json({ error: 'User not found' });
-		res.json(user);
+		res.json({ data: user });
 	} catch (err) {
 		console.error(err);
 		res.status(500).json({ error: err.message });
