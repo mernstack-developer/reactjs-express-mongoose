@@ -22,21 +22,28 @@ import UserList from './components/UserList';
 import GuestList from './components/GuestList';
 import AddGuestForm from './components/AddGuestForm';
 import AddUserForm from './components/AddUserForm';
+import {  AuthProvider } from './context/AuthContext';
+import PrivateRoute from './routes/PrivateRoute';
 export default function App() {
   return (
     <>
-      <Router>
+      
+     
+          <Router>
+                <AuthProvider> 
         <ScrollToTop />
         <Routes>
           {/* Dashboard Layout */}
           <Route element={<AppLayout />}>
-            <Route index path="/" element={<Home />} />
+           <Route element={<PrivateRoute />}>
+            <Route index path="/dashboard" element={<Home />} />
             <Route path="/users" element={<UserList />} />
           <Route path="/guests" element={<GuestList />} />
           <Route path="/add-guest" element={<AddGuestForm />} />
           <Route path="/add-user" element={<AddUserForm />} />
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
+           </Route>
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/blank" element={<Blank />} />
 
@@ -60,13 +67,16 @@ export default function App() {
           </Route>
 
           {/* Auth Layout */}
+          <Route path="/" element={<SignIn />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
 
           {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </Router>
+           </AuthProvider>
+         </Router>
+      
     </>
   );
 }

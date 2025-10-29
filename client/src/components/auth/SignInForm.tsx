@@ -99,7 +99,7 @@ export default function SignInForm() {
                   body: JSON.stringify({ email, password }),
                 });
                 login(data.token, data.user);
-                navigate('/');
+                navigate('/dashboard');
               } catch (err:any) {
                 alert(err.message || err);
               } finally {

@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from 'react';
+import React, { createContext,  useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface AuthContextValue {
@@ -28,6 +28,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       localStorage.removeItem('user');
     }
   }, [token]);
+  // Memoize the context value to avoid unnecessary re-renders
+ 
 
   const login = (t: string, u: any) => {
     setToken(t);
@@ -43,9 +45,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.removeItem('user');
     navigate('/signin');
   };
-
+ const value = useMemo(
+    () => ({ token, user, login, logout }),
+    [token, user]
+  );
   return (
-    <AuthContext.Provider value={{ token, user, login, logout }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
