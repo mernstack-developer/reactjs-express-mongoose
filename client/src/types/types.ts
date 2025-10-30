@@ -1,7 +1,10 @@
 //type UserRole = "user" | "admin";
 export interface User {
   id: string;
-  name: string;
+  firstname: string;
+  lastname: string;
+  phone?: string;
+  bio?: string;
   email: string;
   role: "user" | "admin";
   createdAt: string;
@@ -17,7 +20,13 @@ export interface Guest {
   createdAt: string;
   updatedAt: string;
 }
-
+export interface Notification {
+  id: string;
+  message: string;
+  read: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 export interface InvitationStats {
   accepted: number;
   pending: number;

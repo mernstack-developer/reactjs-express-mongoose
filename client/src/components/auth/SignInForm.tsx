@@ -94,7 +94,7 @@ export default function SignInForm() {
               e.preventDefault();
               setLoading(true);
               try {
-                const data = await api('/api/auth/login', {
+                const data = await api('/auth/login', {
                   method: 'POST',
                   body: JSON.stringify({ email, password }),
                 });

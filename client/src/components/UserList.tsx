@@ -56,6 +56,13 @@ const UserList: React.FC = () => {
             >
               User
             </TableCell>
+            
+            <TableCell
+              isHeader
+              className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+            >
+              Phone
+            </TableCell>
             <TableCell
               isHeader
               className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
@@ -69,9 +76,16 @@ const UserList: React.FC = () => {
               Role
             </TableCell>
             <TableCell
+                isHeader
+                className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+              >
+                Bio
+              </TableCell>
+            <TableCell
               isHeader
               className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
             >
+              
               Action
             </TableCell>
           </TableRow>
@@ -82,13 +96,19 @@ const UserList: React.FC = () => {
         {users.map(user => (
            <TableRow key={user.id}>
              <TableCell className="px-5 py-3 text-gray-500 dark:text-gray-400">
-               {user.name}
+               {user.firstname} {user.lastname}
              </TableCell>
+             <TableCell className="px-5 py-3 text-gray-500 dark:text-gray-400">
+              {user.phone || 'N/A'}
+              </TableCell>
              <TableCell className="px-5 py-3 text-gray-500 dark:text-gray-400">
                {user.email}
              </TableCell>
              <TableCell className="px-5 py-3 text-gray-500 dark:text-gray-400">
                {user.role}
+             </TableCell>
+             <TableCell className="px-5 py-3 text-gray-500 dark:text-gray-400">
+              {user.bio || 'N/A'}
              </TableCell>
              <TableCell className="px-5 py-3 text-gray-500 dark:text-gray-400">
                <button onClick={() => handleEdit(user)}>Edit</button>

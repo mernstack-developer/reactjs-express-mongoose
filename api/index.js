@@ -3,6 +3,7 @@ const express = require('express');
  const mongoose = require('mongoose');
   const userRoutes = require('./routes/user.routes');
   const authRoutes = require('./routes/auth.routes');
+  const authMiddleware = require('./middleware/auth.middleware');
  const dotenv = require('dotenv');
  dotenv.config();
 const app = express();
@@ -23,7 +24,7 @@ app.use(express.json());
  .then(() => console.log('Connected to MongoDB Atlas'))
  .catch(err => console.error('MongoDB connection error:', err));
  //Example Mongoose Model (e.g., in a models/ folder)
- app.use('/api/users', userRoutes);
+ app.use('/api/users', authMiddleware, userRoutes);
  app.use('/api/auth', authRoutes);
 // A simple API route
 app.get('/api/greeting', (req, res) => {

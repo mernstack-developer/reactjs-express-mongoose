@@ -1,10 +1,14 @@
 const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
-	name: { type: String, required: true },
+	firstname: { type: String, required: true },
+	lastname: { type: String, required: true },
+	phone: { type: String },
 	email: { type: String, required: true, unique: true, index: true },
+	bio: { type: String },
 	password: { type: String, required: true },
 	role: { type: String, default: 'user' },
+	
 }, { timestamps: true });
 
 // Remove sensitive fields when converting to JSON

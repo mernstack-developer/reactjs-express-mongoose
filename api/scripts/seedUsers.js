@@ -17,16 +17,16 @@ async function seed() {
 
     const bcrypt = require('bcryptjs');
     const users = [
-      { name: 'Alice Test', email: 'alice.test@example.com', role: 'admin', password: 'password123' },
-      { name: 'Bob Test', email: 'bob.test@example.com', role: 'user', password: 'password123' },
-      { name: 'Carol Test', email: 'carol.test@example.com', role: 'user', password: 'password123' },
+      { firstname: 'Alice Test', lastname: 'Test', email: 'alice.test@example.com', phone: '123-456-7890', role: 'admin', password: 'password123', bio: 'Admin user' },
+      { firstname: 'Bob Test', lastname: 'Test', email: 'bob.test@example.com', phone: '123-456-7890', role: 'user', password: 'password123', bio: 'Regular user' },
+      { firstname: 'Carol Test', lastname: 'Test', email: 'carol.test@example.com', phone: '123-456-7890', role: 'user', password: 'password123', bio: 'Regular user' },
     ];
 
     for (const u of users) {
       const exists = await User.findOne({ email: u.email });
       if (!exists) {
         const hashed = await bcrypt.hash(u.password, 10);
-        await User.create({ name: u.name, email: u.email, role: u.role, password: hashed });
+        await User.create({ firstname: u.firstname, lastname: u.lastname, email: u.email, phone: u.phone, role: u.role, password: hashed, bio: u.bio });
         console.log(`Inserted ${u.email}`);
       } else {
         console.log(`${u.email} already exists`);
