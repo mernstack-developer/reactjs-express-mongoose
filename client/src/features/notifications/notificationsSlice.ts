@@ -41,16 +41,24 @@ const notificationsSlice = createSlice({
   name: 'notifications',
   initialState,
   reducers: {
-    markReadLocal: (state, action: PayloadAction<string>) => { /* ... */ },
+    markReadLocal: (state, action: PayloadAction<string>) => { 
+      /* ... */
+     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchNotifications.pending, (state) => { /* ... */ })
+      .addCase(fetchNotifications.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+         })
       .addCase(fetchNotifications.fulfilled, (state, action: PayloadAction<Notification[]>) => {
-        // Add new notifications and sort by date
-        /* ... */
+       state.loading = false;
+        state.data = action.payload;
+        //state.lastUpdated = new Date().toISOString();
       })
-      .addCase(fetchNotifications.rejected, (state, action) => { /* ... */ });
+      .addCase(fetchNotifications.rejected, (state, action) => {
+         /* ... */ 
+        });
   },
 });
 

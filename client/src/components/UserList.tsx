@@ -6,6 +6,7 @@ import { User } from '../types/types';
 //import ComponentCard from './common/ComponentCard';
 //import BasicTableOne from './tables/BasicTables/BasicTableOne';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from './ui/table';
+import ComponentCard from './common/ComponentCard';
 
 const UserList: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -35,8 +36,7 @@ const UserList: React.FC = () => {
 
   return (
     <div className="user-list">
-      <h2>Users</h2>
-
+     
       {editingUser && (
         <div className="modal">
           <EditUserForm
@@ -45,7 +45,7 @@ const UserList: React.FC = () => {
           />
         </div>
       )}
-
+ <ComponentCard title="Users List">
       <Table>
         {/* Table Header */}
         <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
@@ -124,6 +124,7 @@ const UserList: React.FC = () => {
             
       </TableBody>
       </Table>
+      </ComponentCard>
     </div>
   );
 };

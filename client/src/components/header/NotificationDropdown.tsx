@@ -3,11 +3,12 @@ import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { Link } from "react-router";
 import { apiClient } from "../../utils/api";
-
+import { formatTimeAgo } from '../../utils/formatTime';
+import { Notification } from "../../types/types";
 export default function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const [notifying, setNotifying] = useState(true);
- const [notifications, setNotifications] = useState([]);
+ const [notifications, setNotifications] = useState<Notification[]>([]);
 
   function toggleDropdown() {
     setIsOpen(!isOpen);
@@ -24,7 +25,8 @@ export default function NotificationDropdown() {
    const fetchNotifications = async () => {
     try {
       const response = await apiClient.get('/notifications');
-      setNotifications(response.data);
+      console.log('Fetched notifications:', response.data);
+      setNotifications(response.data.data);
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
     }
@@ -124,7 +126,7 @@ export default function NotificationDropdown() {
                 <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
                   <span>Project</span>
                   <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                  <span>5 min ago</span>
+                  <span> {formatTimeAgo(notification.createdAt)}</span>
                 </span>
               </span>
             </DropdownItem>
