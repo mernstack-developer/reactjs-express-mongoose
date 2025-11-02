@@ -20,7 +20,6 @@ export const fetchUsers = createAsyncThunk<User[]>(
   'users/fetchUsers',
   async () => {
     const response = await apiClient.get<ApiResponse<User[]>>('/users');
-    console.log('Fetched users:', response.data);
     return response.data.data;
   }
 );

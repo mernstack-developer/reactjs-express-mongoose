@@ -1,6 +1,6 @@
 //type UserRole = "user" | "admin";
 export interface User {
-  id: string;
+  _id: string;
   firstname: string;
   lastname: string;
   phone?: string;
@@ -35,7 +35,7 @@ export interface Order {
   budget: string;
 }
 export interface Notification {
-  id: string;
+  _id: string;
   message: string;
   read: boolean;
   createdAt: string;

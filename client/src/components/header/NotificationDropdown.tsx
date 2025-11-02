@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { Link } from "react-router";
-import { apiClient } from "../../utils/api";
 import { formatTimeAgo } from '../../utils/formatTime';
-import { Notification } from "../../types/types";
+import { fetchNotifications } from "../../features/notifications/notificationsSlice";
+import { useAppSelector,useAppDispatch } from "../../hooks";
+
 export default function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const [notifying, setNotifying] = useState(true);
- const [notifications, setNotifications] = useState<Notification[]>([]);
+  const dispatch = useAppDispatch();
 
   function toggleDropdown() {
     setIsOpen(!isOpen);
@@ -22,19 +23,20 @@ export default function NotificationDropdown() {
     toggleDropdown();
     setNotifying(false);
   };
-   const fetchNotifications = async () => {
-    try {
-      const response = await apiClient.get('/notifications');
-      console.log('Fetched notifications:', response.data);
-      setNotifications(response.data.data);
-    } catch (error) {
-      console.error('Failed to fetch notifications:', error);
-    }
-  };
+const {data:notifications, loading, error} = useAppSelector((state) => state.notifications);
+    useEffect(() => {
+    dispatch(fetchNotifications() );
+  }, [dispatch]);
+  if (loading) {
+    return <div>Loading Notifications...</div>;
+  }
 
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+  if (notifications.length === 0) {
+    return <div>No notifications available</div>;
+  }
   return (
     <div className="relative">
       <button
@@ -93,13 +95,11 @@ export default function NotificationDropdown() {
           </button>
         </div>
         <ul className="flex flex-col h-auto overflow-y-auto custom-scrollbar">
-          {/* Example notification items */}
-                      {notifications.map(notification => (
-
-          <li>
-            <DropdownItem
-              onItemClick={closeDropdown}
-              className="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
+          {notifications.map((notification) => (
+            <li key={notification._id}>
+              <DropdownItem
+                onItemClick={closeDropdown}
+                className="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
             >
               <span className="relative block w-full h-10 rounded-full z-1 max-w-10">
                 <img
@@ -132,9 +132,6 @@ export default function NotificationDropdown() {
             </DropdownItem>
           </li>
  ))}
-
-    
-   
           {/* Add more items as needed */}
         </ul>
         <Link

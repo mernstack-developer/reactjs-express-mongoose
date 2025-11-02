@@ -7,10 +7,11 @@ async function createNotification(data) {
 
 async function getNotifications(since) {
    // try {
-    let query = {};
-    if (since) {
-      query.createdAt = { $gt: new Date(since ) };
-    }
+   let query = {};
+// If a 'since' date is available, add a condition to the query object
+if (since instanceof Date && !isNaN(since)) {
+  query.createdAt = { $gt: since }; // Filter for createdAt greater than 'since'
+}
     const notifications = await Notification.find(query).sort({ createdAt: -1 });
     //res.status(200).json(notifications);
  // } catch (error) {
