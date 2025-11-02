@@ -19,7 +19,8 @@ export const GuestCreateSchema = z.object({
 });
 
 export const UserCreateSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
+  firstname: z.string().min(1, 'First Name is required'),
+  lastname: z.string().min(1, 'Last Name is required'),
   email: z.string().email('Invalid email'),
   role: z.enum(['admin', 'user'], 'Role must be admin or user'),
 });
@@ -29,7 +30,8 @@ export const GuestEditSchema = GuestCreateSchema.partial().extend({
 });
 
 export const UserEditSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
+  firstname: z.string().min(1, 'First Name is required'),
+  lastname: z.string().min(1, 'Last Name is required'),
   email: z.string().email('Invalid email'),
   role: z.enum(['admin', 'user'], 'Role must be admin or user'),
 });

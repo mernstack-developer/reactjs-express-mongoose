@@ -94,7 +94,7 @@ const UserList: React.FC = () => {
           <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
 
         {users.map(user => (
-           <TableRow key={user.id}>
+           <TableRow key={user._id}>
              <TableCell className="px-5 py-3 text-gray-500 dark:text-gray-400">
                {user.firstname} {user.lastname}
              </TableCell>
@@ -113,7 +113,7 @@ const UserList: React.FC = () => {
              <TableCell className="px-5 py-3 text-gray-500 dark:text-gray-400">
                <button onClick={() => handleEdit(user)}>Edit</button>
                <button
-                 onClick={() => handleDelete(user.id)}
+                 onClick={() => handleDelete(user._id)}
                  className="delete-button"
                >
                  Delete

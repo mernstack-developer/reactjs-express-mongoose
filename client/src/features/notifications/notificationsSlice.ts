@@ -42,7 +42,7 @@ const notificationsSlice = createSlice({
   initialState,
   reducers: {
     markReadLocal: (state, action: PayloadAction<string>) => {
-      const notification = state.data.find(n => n.id === action.payload);
+      const notification = state.data.find(n => n._id === action.payload);
       if (notification) {
         notification.read = true;
       }
@@ -65,7 +65,7 @@ const notificationsSlice = createSlice({
         state.error = action.error.message || 'Failed to fetch notifications';
       })
       .addCase(markNotificationAsRead.fulfilled, (state, action) => {
-        const notification = state.data.find(n => n.id === action.meta.arg);
+        const notification = state.data.find(n => n._id === action.meta.arg);
         if (notification) {
           notification.read = true;
         }

@@ -16,7 +16,8 @@ const AddUserForm: React.FC = () => {
   } = useForm<UserCreateForm>({
     resolver: zodResolver(UserCreateSchema),
     defaultValues: {
-      name: '',
+      firstname: '',
+      lastname: '',
       email: '',
       role: 'user',
     },
@@ -35,10 +36,16 @@ const AddUserForm: React.FC = () => {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="add-guest-form" noValidate>
       <div className="form-group">
-        <label htmlFor="name">Name</label>
-        <input id="name" {...register('name')} />
-        {errors.name && <p className="error">{errors.name.message}</p>}
+        <label htmlFor="firstname">First Name</label>
+        <input id="firstname" {...register('firstname')} />
+        {errors.firstname && <p className="error">{errors.firstname.message}</p>}
       </div>
+      <div className="form-group">
+        <label htmlFor="lastname">Last Name</label>
+        <input id="lastname" {...register('lastname')} />
+        {errors.lastname && <p className="error">{errors.lastname.message}</p>}
+      </div>
+
 
       <div className="form-group">
         <label htmlFor="role">Role</label>

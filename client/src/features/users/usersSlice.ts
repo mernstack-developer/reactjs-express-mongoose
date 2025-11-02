@@ -24,7 +24,7 @@ export const fetchUsers = createAsyncThunk<User[]>(
   }
 );
 
-export const addUser = createAsyncThunk<User, Omit<User, 'id' | 'createdAt' | 'updatedAt'>>(
+export const addUser = createAsyncThunk<User, Omit<User, '_id' | 'createdAt' | 'updatedAt'>>(
   'users/addUser',
   async (userData) => {
     const response = await apiClient.post<ApiResponse<User>>('/users', userData);
@@ -75,14 +75,14 @@ const usersSlice = createSlice({
         state.lastUpdated = new Date().toISOString();
       })
       .addCase(editUser.fulfilled, (state, action: PayloadAction<User>) => {
-        const index = state.data.findIndex(user => user.id === action.payload.id);
+        const index = state.data.findIndex(user => user._id === action.payload._id);
         if (index !== -1) {
           state.data[index] = action.payload;
         }
         state.lastUpdated = new Date().toISOString();
       })
       .addCase(deleteUser.fulfilled, (state, action: PayloadAction<string>) => {
-        state.data = state.data.filter(user => user.id !== action.payload);
+        state.data = state.data.filter(user => user._id !== action.payload);
         state.lastUpdated = new Date().toISOString();
       });
   },
