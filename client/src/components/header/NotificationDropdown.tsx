@@ -34,9 +34,7 @@ const {data:notifications, loading, error} = useAppSelector((state) => state.not
   if (error) {
     return <div>Error: {error}</div>;
   }
-  if (notifications.length === 0) {
-    return <div>No notifications available</div>;
-  }
+
   return (
     <div className="relative">
       <button
@@ -95,7 +93,7 @@ const {data:notifications, loading, error} = useAppSelector((state) => state.not
           </button>
         </div>
         <ul className="flex flex-col h-auto overflow-y-auto custom-scrollbar">
-          {notifications.map((notification) => (
+          {notifications?.map((notification) => (
             <li key={notification._id}>
               <DropdownItem
                 onItemClick={closeDropdown}

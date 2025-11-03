@@ -36,8 +36,15 @@ export const UserEditSchema = z.object({
   role: z.enum(['admin', 'user'], 'Role must be admin or user'),
 });
 
+export const ContactFormSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  email: z.string().email('Invalid email'),
+  subject: z.string().min(1, 'Subject is required'),
+  message: z.string().min(1, 'Message is required'),
+});
 // Export TS types inferred from the schemas
 export type GuestCreateForm = z.infer<typeof GuestCreateSchema>;
 export type UserCreateForm = z.infer<typeof UserCreateSchema>;
+export type ContactFormSchema = z.infer<typeof ContactFormSchema>;
 export type GuestEditForm = z.infer<typeof GuestEditSchema>;
 export type UserEditForm = z.infer<typeof UserEditSchema>;

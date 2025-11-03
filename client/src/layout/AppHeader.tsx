@@ -5,10 +5,10 @@ import { useSidebar } from "../context/SidebarContext";
 import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
 import NotificationDropdown from "../components/header/NotificationDropdown";
 import UserDropdown from "../components/header/UserDropdown";
-
+import { useAuth } from '../hooks/useAuth';
 const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
-
+ const {user } = useAuth();
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
 
   const handleToggle = () => {
@@ -151,20 +151,52 @@ const AppHeader: React.FC = () => {
             </form>
           </div>
         </div>
+      {/* topbar middle design for menu and sub menu like courses have different category of courses */ }
+      <div className="hidden lg:flex lg:mx-8">    
+        <div className="w-full lg:w-auto">
+          <Link to="/courses" className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+            Courses
+          </Link>
+        </div>  
+        <div className="w-full lg:w-auto lg:ml-6">
+          <Link to="/about" className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+            About
+          </Link>
+        </div>  
+        <div className="w-full lg:w-auto lg:ml-6">
+          <Link to="/contact" className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+            Contact
+          </Link>
+        </div>  
+      </div>
+      {/* topbar middle design for menu and sub menu like courses have different category of courses */ } 
+
         <div
           className={`${
             isApplicationMenuOpen ? "flex" : "hidden"
           } items-center justify-between w-full gap-4 px-5 py-4 lg:flex shadow-theme-md lg:justify-end lg:px-0 lg:shadow-none`}
         >
+
           <div className="flex items-center gap-2 2xsm:gap-3">
+
             {/* <!-- Dark Mode Toggler --> */}
             <ThemeToggleButton />
             {/* <!-- Dark Mode Toggler --> */}
             <NotificationDropdown />
+           
             {/* <!-- Notification Menu Area --> */}
           </div>
           {/* <!-- User Area --> */}
-          <UserDropdown />
+          {user && (
+            <div className="flex items-center gap-2">
+              <span className="block font-medium text-gray-700 dark:text-gray-400">
+                {user.name}
+              </span>
+              <UserDropdown />
+            </div>
+          ) || (
+            <Link to="/signin" className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">Sign In</Link>
+          )}
         </div>
       </div>
     </header>

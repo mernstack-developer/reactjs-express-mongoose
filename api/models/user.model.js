@@ -8,7 +8,8 @@ const UserSchema = new mongoose.Schema({
 	bio: { type: String },
 	password: { type: String, required: true },
 	role: { type: String, default: 'user' },
-	
+  	registeredCourses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Course' }],
+
 }, { timestamps: true });
 
 // Remove sensitive fields when converting to JSON

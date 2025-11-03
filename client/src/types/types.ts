@@ -10,6 +10,32 @@ export interface User {
   createdAt: string;
   updatedAt: string;
 }
+export interface ContentBlock {
+  _id: string;
+  type: 'video' | 'text' | 'quiz';
+  title: string;
+  videoUrl?: string;
+  textBody?: string;
+  quizData?: Record<string, any>; // Flexible type for quiz data structure
+}
+export interface CourseSection {
+  _id: string;
+  sectionTitle: string;
+  contents: ContentBlock[];
+}
+
+export interface Course {
+  _id: string;
+  title: string;
+  description: string;
+    sections: CourseSection[]; // Courses now have sections
+  instructor: string;
+  duration: number; // in hours
+  registeredUsers: string[]; // array of user IDs
+  createdBy: string; // user ID of the creator
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface Guest {
   id: string;

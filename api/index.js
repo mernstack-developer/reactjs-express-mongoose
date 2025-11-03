@@ -1,14 +1,15 @@
 const express = require('express');
-  // const cors = require('cors');
+  const cors = require('cors');
  const mongoose = require('mongoose');
   const userRoutes = require('./routes/user.routes');
   const authRoutes = require('./routes/auth.routes');
-  const notificationRoutes=require('./routes/notification.routes')
+  const notificationRoutes=require('./routes/notification.routes');
+  const courseRoutes = require('./routes/course.routes');
   const authMiddleware = require('./middleware/auth.middleware');
  const dotenv = require('dotenv');
  dotenv.config();
 const app = express();
-//app.use(cors()); 
+app.use(cors()); 
 app.use(express.json());
 // Connect to MongoDB
  const mongoUri = process.env.MONGODB_URI || process.env.DB_URI;
@@ -28,6 +29,7 @@ app.use(express.json());
  app.use('/api/users', authMiddleware, userRoutes);
  app.use('/api/auth', authRoutes);
  app.use('/api/notifications',notificationRoutes)
+ app.use('/api/courses',courseRoutes);
 // A simple API route
 app.get('/api/greeting', (req, res) => {
   res.json({ message: 'Hello from the Express server!' });

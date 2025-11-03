@@ -13,13 +13,16 @@ export default function UserDropdown() {
   }
 const handleLogout = () => {
     logout();
-    navigate('/login', { replace: true }); // Redirect to login page
+    navigate('/signin', { replace: true }); // Redirect to login page
   };
   function closeDropdown() {
     setIsOpen(false);
   }
   return (
+    <>
+          {user && (
     <div className="relative">
+
       <button
         onClick={toggleDropdown}
         className="flex items-center text-gray-700 dropdown-toggle dark:text-gray-400"
@@ -28,7 +31,7 @@ const handleLogout = () => {
           <img src="/images/user/owner.jpg" alt="User" />
         </span>
 
-        <span className="block mr-1 font-medium text-theme-sm">{user.name}</span>
+        <span className="block mr-1 font-medium text-theme-sm">{user?.name}</span>
         <svg
           className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
@@ -56,10 +59,10 @@ const handleLogout = () => {
       >
         <div>
           <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-            {user.name}
+            {user?.name}
           </span>
           <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-            {user.email}
+            {user?.email}
           </span>
         </div>
 
@@ -163,6 +166,8 @@ const handleLogout = () => {
           Sign out
         </Link>
       </Dropdown>
+       
     </div>
+ )}   </>
   );
 }

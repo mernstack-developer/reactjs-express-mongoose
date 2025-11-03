@@ -24,19 +24,29 @@ import AddGuestForm from './components/AddGuestForm';
 import AddUserForm from './components/AddUserForm';
 import {  AuthProvider } from './context/AuthContext';
 import PrivateRoute from './routes/PrivateRoute';
+import Courses from "./pages/FrontPages/Courses";
+import FrontPageLayout from "./pages/FrontPages/FrontPagesLayout";
+import AboutUs from "./pages/FrontPages/Aboutus";
+import Contact from "./pages/FrontPages/Contact";
+import CourseDetail from "./pages/FrontPages/CourseDetail";
 export default function App() {
   return (
     <>
-      
-     
-          <Router>
-                <AuthProvider> 
-        <ScrollToTop />
-        <Routes>
+      <Router>
+        <AuthProvider>
+          <ScrollToTop />
+          <Routes>
+            <Route element={<FrontPageLayout />}>
+           <Route index path="/" element={<Courses />} />
+           <Route  path="/courses" element={<Courses />} />
+           <Route path="/about" element={<AboutUs />} />
+           <Route path="/contact" element={<Contact />} />
+           <Route path="/courses/:_id" element={<CourseDetail />} />
+           </Route>
           {/* Dashboard Layout */}
           <Route element={<AppLayout />}>
            <Route element={<PrivateRoute />}>
-            <Route index path="/dashboard" element={<Home />} />
+            <Route  path="/dashboard" element={<Home />} />
             <Route path="/users" element={<UserList />} />
           <Route path="/guests" element={<GuestList />} />
           <Route path="/add-guest" element={<AddGuestForm />} />

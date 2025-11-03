@@ -1,5 +1,5 @@
 import axios from 'axios';
-const baseURL='api';
+const baseURL='http://localhost:3000/api';
 export async function api(path: string, options: RequestInit = {}) {
   const token = localStorage.getItem('token');
   const headers = new Headers(options.headers || {} as any);
