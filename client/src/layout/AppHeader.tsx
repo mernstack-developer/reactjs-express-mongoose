@@ -5,10 +5,14 @@ import { useSidebar } from "../context/SidebarContext";
 import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
 import NotificationDropdown from "../components/header/NotificationDropdown";
 import UserDropdown from "../components/header/UserDropdown";
-import { useAuth } from '../hooks/useAuth';
+//import { useAuth } from '../hooks/useAuth';
+import { useAppSelector } from "../hooks";
+import { RootState } from "../store";
 const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
- const {user } = useAuth();
+// const {user } = useAuth();
+  const { isAuthenticated, data:user} = useAppSelector((state: RootState) => state.user);
+
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
 
   const handleToggle = () => {

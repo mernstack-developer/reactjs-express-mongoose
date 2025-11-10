@@ -1,8 +1,11 @@
 import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth'; // Adjust the path to your useAuth hook
+//import { useAuth } from '../hooks/useAuth'; // Adjust the path to your useAuth hook
+//import { useAppSelector } from '../hooks';
 
 const PrivateRoute = () => {
-  const { token } = useAuth(); // Retrieve the token from your custom hook
+  //const { token } = useAuth(); // Retrieve the token from your custom hook
+  const token:string | null = localStorage.getItem('token');
+  //useAppSelector((state: RootState) => state.user);
 
   // Check if the user is authenticated (e.g., if a token exists).
   // The token is of type string | null, so a simple check works.

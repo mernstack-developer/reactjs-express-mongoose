@@ -3,11 +3,13 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
-import { useAuth } from "../../hooks/useAuth";
-
+//import { useAuth } from "../../hooks/useAuth";
+import {  useAppSelector } from "../../hooks";
+import { RootState } from "../../store";
 export default function UserMetaCard() {
   const { isOpen, openModal, closeModal } = useModal();
-  const { user } = useAuth();
+       const { data:user, isAuthenticated, loading, error }
+     = useAppSelector((state: RootState) => state.user);
   const handleSave = () => {
     // Handle save logic here
     console.log("Saving changes...");

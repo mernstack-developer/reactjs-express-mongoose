@@ -8,6 +8,9 @@ import { useAppSelector } from '../../hooks';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import PageMeta from '../../components/common/PageMeta';
 import ComponentCard from '../../components/common/ComponentCard';
+import { registerForCourse} from '../../features/courses/coursesSlice';
+import { useAuth } from '../../hooks/useAuth';
+
 // Helper component to render different content types
 const ContentBlockRenderer: React.FC<{ content: ContentBlock }> = ({ content }) => {
   switch (content.type) {
@@ -55,7 +58,7 @@ const SectionRenderer: React.FC<{ section: CourseSection }> = ({ section }) => {
 export default function CourseDetail() {
      const dispatch = useDispatch<AppDispatch>();
     const { _id } = useParams<{ _id: string }>();
- 
+  const {user } = useAuth();
   const { selectedCourse: course } = useAppSelector((state: RootState) => state.courses);
   const loading = useAppSelector((state: RootState) => state.courses.loading);
   const error = useAppSelector((state: RootState) => state.courses.error);
@@ -67,10 +70,18 @@ export default function CourseDetail() {
         }
     }, [dispatch, _id, course]);
 
-
+  const handleEnroll = (courseId: string) => {
+    dispatch(registerForCourse(courseId));
+  };
     if (loading) return <div>Loading course details...</div>;
-    if (error) return <div>Error: {error}</div>;
-    if (!course) return <div>Course not found.</div>;
+     // Handle the Forbidden error message returned by the backend middleware
+  if (error && error.includes('Forbidden')) {
+    return <div>{error} You must enroll in this course to view the content.</div>;
+  }
+  if (error) return <div>Error: {error}</div>;
+  if (!course) return <div>Course not found.</div>;
+  const currentUserId = user._id;
+  const isEnrolled = course.registeredUsers.includes(currentUserId);
 
     return (
       <>
@@ -88,6 +99,14 @@ export default function CourseDetail() {
             {course.sections.map((section) => (
                 <SectionRenderer key={section._id} section={section} />
             ))}
+             {isEnrolled ? (
+        <div className="course-content">
+          <h2>Sections (Visible to Enrolled Students)</h2>
+          {/* Render sections, videos, quizzes here */}
+        </div>
+      ) : (
+        <button onClick={() => handleEnroll(course._id)}>Enroll Now</button>
+      )}
         </div>
         </ComponentCard>
         </>

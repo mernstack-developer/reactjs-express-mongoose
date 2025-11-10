@@ -22,7 +22,7 @@ import UserList from './components/UserList';
 import GuestList from './components/GuestList';
 import AddGuestForm from './components/AddGuestForm';
 import AddUserForm from './components/AddUserForm';
-import {  AuthProvider } from './context/AuthContext';
+//import {  AuthProvider } from './context/AuthContext';
 import PrivateRoute from './routes/PrivateRoute';
 import Courses from "./pages/FrontPages/Courses";
 import FrontPageLayout from "./pages/FrontPages/FrontPagesLayout";
@@ -33,7 +33,6 @@ export default function App() {
   return (
     <>
       <Router>
-        <AuthProvider>
           <ScrollToTop />
           <Routes>
             <Route element={<FrontPageLayout />}>
@@ -84,7 +83,6 @@ export default function App() {
           {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-           </AuthProvider>
          </Router>
       
     </>

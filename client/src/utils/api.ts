@@ -1,5 +1,9 @@
 import axios from 'axios';
-const baseURL='http://localhost:3000/api';
+{/* get NODE_ENV from process.env */}
+const baseURL = process.env.NODE_ENV === 'production'
+  ? process.env.REACT_APP_API_URL!
+  : 'http://localhost:3000/api';
+
 export async function api(path: string, options: RequestInit = {}) {
   const token = localStorage.getItem('token');
   const headers = new Headers(options.headers || {} as any);

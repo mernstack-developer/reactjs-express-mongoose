@@ -12,7 +12,7 @@ export const AuthContext = createContext<AuthContextValue>({
   token: null,
   user: null,
   login: () => {},
-  logout: () => {}
+  logout: () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {

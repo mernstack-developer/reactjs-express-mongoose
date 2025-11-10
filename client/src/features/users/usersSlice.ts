@@ -1,9 +1,12 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { User, ApiResponse } from '../../types/types';
 import { apiClient } from '../../utils/api';
+export type Permission = 'view_course' | 'edit_course' | 'delete_course' | 'submit_assignment';
 
 interface UsersState {
   data: User[];
+  isAuthenticated: boolean;
+  //permissions: Permission[]; // Store actual permissions
   loading: boolean;
   error: string | null;
   lastUpdated: string | null;
@@ -11,6 +14,8 @@ interface UsersState {
 
 const initialState: UsersState = {
   data: [],
+  isAuthenticated: false,
+ // permissions: [],
   loading: false,
   error: null,
   lastUpdated: null,

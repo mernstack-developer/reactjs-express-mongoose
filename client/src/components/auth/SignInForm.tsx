@@ -1,13 +1,13 @@
-import { useState, useContext } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { AuthContext } from "../../context/AuthContext";
-import { api } from "../../utils/api";
+//import { AuthContext } from "../../context/AuthContext";
+import { useAppDispatch } from "../../hooks";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
-
+import {loginUser} from  '../../features/auth/userSlice';
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
@@ -15,7 +15,8 @@ export default function SignInForm() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext);
+  const dispatch = useAppDispatch();
+ // const { login } = useContext(AuthContext);
   return (
     <div className="flex flex-col flex-1">
       <div className="w-full max-w-md pt-10 mx-auto">
@@ -94,11 +95,7 @@ export default function SignInForm() {
               e.preventDefault();
               setLoading(true);
               try {
-                const data = await api('/auth/login', {
-                  method: 'POST',
-                  body: JSON.stringify({ email, password }),
-                });
-                login(data.token, data.user);
+                dispatch(loginUser({ email, password }))
                 navigate('/dashboard');
               } catch (err:any) {
                 alert(err.message || err);

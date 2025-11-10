@@ -3,16 +3,30 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
-import { useAuth } from "../../hooks/useAuth";
+import  { useEffect } from 'react';
+import { RootState } from "../../store";
+//import { useAuth } from "../../hooks/useAuth";
+import {  useAppSelector } from "../../hooks";
+//import {fetchProfile} from "../../features/auth/userSlice";
 
 export default function UserInfoCard() {
   const { isOpen, openModal, closeModal } = useModal();
-    const { user } = useAuth();
+    ////const { user } = useAuth();
+       const { data:user,isAuthenticated}
+     = useAppSelector((state: RootState) => state.user);
+     console.log("user",user)
+    //  const { user: user, loading, error } = useAppSelector(state => state.user);
+    //   const dispatch = useAppDispatch();
   const handleSave = () => {
     // Handle save logic here
     console.log("Saving changes...");
     closeModal();
   };
+    useEffect(() => {
+    if (isAuthenticated && !user) {
+        //dispatch(fetchProfile(user?.email));
+    }
+  }, [isAuthenticated, user]);
   return (
     <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">

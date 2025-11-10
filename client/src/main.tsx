@@ -9,13 +9,17 @@ import { AppWrapper } from "./components/common/PageMeta.tsx";
 import { ThemeProvider } from "./context/ThemeContext.tsx";
 import { Provider } from 'react-redux';
 import { store } from './store.ts';
+import AuthProvider  from ".././src/features/auth/AuthProvider.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProvider>
       <AppWrapper>
         <Provider store={store}>
+      {/* AuthProvider handles initial auth check */}
+      <AuthProvider> 
         <App />
+      </AuthProvider>
         </Provider>
       </AppWrapper>
     </ThemeProvider>

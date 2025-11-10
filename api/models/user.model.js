@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+//const { ROLES_MAP } = require('../../config/rolesConfig');
 
 const UserSchema = new mongoose.Schema({
 	firstname: { type: String, required: true },
@@ -7,8 +8,14 @@ const UserSchema = new mongoose.Schema({
 	email: { type: String, required: true, unique: true, index: true },
 	bio: { type: String },
 	password: { type: String, required: true },
-	role: { type: String, default: 'user' },
-  	registeredCourses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Course' }],
+	//role: { type: String, default: 'user' },
+	// This links the User model to the Role model
+	role: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'Role',
+		required: true,
+	},
+	registeredCourses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Course' }],
 
 }, { timestamps: true });
 
