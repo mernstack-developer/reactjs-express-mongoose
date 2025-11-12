@@ -18,73 +18,101 @@ import Blank from "./pages/Blank";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
-import UserList from './components/UserList';
 import GuestList from './components/GuestList';
 import AddGuestForm from './components/AddGuestForm';
 import AddUserForm from './components/AddUserForm';
-//import {  AuthProvider } from './context/AuthContext';
+import PermissionsPage from './pages/Permissions';
+import RolesPage from './pages/Roles';
+import UserRolesPage from './pages/UserRoles';
 import PrivateRoute from './routes/PrivateRoute';
 import Courses from "./pages/FrontPages/Courses";
 import FrontPageLayout from "./pages/FrontPages/FrontPagesLayout";
 import AboutUs from "./pages/FrontPages/Aboutus";
 import Contact from "./pages/FrontPages/Contact";
 import CourseDetail from "./pages/FrontPages/CourseDetail";
+import StudentCourses from "./pages/StudentCourses";
+import StudentCourseDetail from "./pages/StudentCourseDetail";
+import CategoriesPage from "./pages/Categories";
+import CategoryDetail from "./pages/CategoryDetail";
+import AdminCategories from "./pages/AdminCategories";
+import CourseEditor from "./pages/CourseEditor";
+import CourseManagement from "./pages/CourseManagement";
+import CreateCourse from "./pages/CreateCourse";
+import AssignmentPage from './pages/AssignmentPage';
+import PublicCourses from "./pages/PublicCourses";
+import UserManagement from "./pages/UserManagement";
+import UserEnrolledCourses from './pages/UserEnrolledCourses';
+import CourseEnrollments from './pages/CourseEnrollments';
+import UsersByRole from './pages/UsersByRole';
+
 export default function App() {
   return (
     <>
       <Router>
-          <ScrollToTop />
-          <Routes>
-            <Route element={<FrontPageLayout />}>
-           <Route index path="/" element={<Courses />} />
-           <Route  path="/courses" element={<Courses />} />
-           <Route path="/about" element={<AboutUs />} />
-           <Route path="/contact" element={<Contact />} />
-           <Route path="/courses/:_id" element={<CourseDetail />} />
-           </Route>
-          {/* Dashboard Layout */}
+        <ScrollToTop />
+        <Routes>
+          {/* Public Front-End Pages */}
+          <Route element={<FrontPageLayout />}>
+            <Route index path="/" element={<Courses />} />
+            <Route path="/about" element={<AboutUs />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/courses/:id" element={<CourseDetail />} />
+            <Route path="/public-courses" element={<PublicCourses />} />
+          </Route>
+
+          {/* Student & Admin Dashboard Layout */}
           <Route element={<AppLayout />}>
-           <Route element={<PrivateRoute />}>
-            <Route  path="/dashboard" element={<Home />} />
-            <Route path="/users" element={<UserList />} />
-          <Route path="/guests" element={<GuestList />} />
-          <Route path="/add-guest" element={<AddGuestForm />} />
-          <Route path="/add-user" element={<AddUserForm />} />
-            {/* Others Page */}
-            <Route path="/profile" element={<UserProfiles />} />
-           </Route>
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/blank" element={<Blank />} />
+            <Route element={<PrivateRoute />}>
+              {/* Student Pages */}
+              <Route path="/dashboard" element={<Home />} />
+              <Route path="/my-courses" element={<StudentCourses />} />
+              <Route path="/course/:id" element={<StudentCourseDetail />} />
+                <Route path="/categories" element={<CategoriesPage />} />
+                <Route path="/categories/:id" element={<CategoryDetail />} />
+              <Route path="/profile" element={<UserProfiles />} />
+              <Route path="/assignments/:id" element={<AssignmentPage />} />
+              <Route path="/calendar" element={<Calendar />} />
+              <Route path="/blank" element={<Blank />} />
 
-            {/* Forms */}
+              {/* Admin Pages (Protected with /admin prefix) */}
+              <Route path="/admin/dashboard" element={<Home />} />
+              <Route path="/admin/users" element={<UserManagement />} />
+              <Route path="/admin/guests" element={<GuestList />} />
+              <Route path="/admin/add-guest" element={<AddGuestForm />} />
+              <Route path="/admin/add-user" element={<AddUserForm />} />
+              <Route path="/admin/permissions" element={<PermissionsPage />} />
+              <Route path="/admin/roles" element={<RolesPage />} />
+              <Route path="/admin/user-roles" element={<UserRolesPage />} />
+              <Route path="/admin/courses" element={<CourseManagement />} />
+              <Route path="/admin/courses/create" element={<CreateCourse />} />
+              <Route path="/admin/courses/:id/editor" element={<CourseEditor />} />
+              <Route path="/admin/categories" element={<AdminCategories />} />
+              <Route path="/users/:userId/enrolled-courses" element={<UserEnrolledCourses />} />
+              <Route path="/courses/:courseId/enrollments" element={<CourseEnrollments />} />
+              <Route path="/roles/:roleId/users" element={<UsersByRole />} />
+            </Route>
+
+            {/* UI Component Pages (visible for testing) */}
             <Route path="/form-elements" element={<FormElements />} />
-
-            {/* Tables */}
             <Route path="/basic-tables" element={<BasicTables />} />
-
-            {/* Ui Elements */}
             <Route path="/alerts" element={<Alerts />} />
             <Route path="/avatars" element={<Avatars />} />
             <Route path="/badge" element={<Badges />} />
             <Route path="/buttons" element={<Buttons />} />
             <Route path="/images" element={<Images />} />
             <Route path="/videos" element={<Videos />} />
-
-            {/* Charts */}
             <Route path="/line-chart" element={<LineChart />} />
             <Route path="/bar-chart" element={<BarChart />} />
           </Route>
 
           {/* Auth Layout */}
-          <Route path="/" element={<SignIn />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
 
           {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-         </Router>
-      
+      </Router>
     </>
   );
 }

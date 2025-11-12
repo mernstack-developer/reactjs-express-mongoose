@@ -99,8 +99,10 @@ export const userSlice = createSlice({
         state.loading = false;
         state.isAuthenticated = true;
         state.data = action.payload.data;
-        console.log("permissions in slice:", action.payload);
-        state.permissions = action.payload.permissions;
+        // Ensure permissions is always a flat array of strings
+        state.permissions = Array.isArray(action.payload.permissions)
+          ? action.payload.permissions
+          : [];
         state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
@@ -130,13 +132,14 @@ export const userSlice = createSlice({
       })
 
       .addCase(checkAuthStatus.fulfilled, (state, action) => {
-        // Assume checkAuthStatus returns { user, permissions } just like login
         state.isAuthenticated = true;
         state.data = action.payload.user;
-        state.permissions = action.payload?.user?.role?.permissions;
+        // Ensure permissions is always a flat array of strings
+        state.permissions = Array.isArray(action.payload?.user?.role?.permissions)
+          ? action.payload.user.role.permissions.map((p: any) => p.name)
+          : [];
         state.loading = false;
         state.error = null;
-        console.log("permissions in slice checkAuthStatus:", action.payload);
       })
       .addCase(checkAuthStatus.rejected, (state) => {
         state.isAuthenticated = false;
@@ -169,5 +172,9 @@ export const userSlice = createSlice({
 
 // Selector to easily get permissions
 export const selectPermissions = (state: RootState) => state.user.permissions;
+
+// Selector to check if user has a specific permission
+export const hasPermission = (permission: string) => (state: RootState) =>
+  state.user.permissions.includes(permission);
 
 export default userSlice.reducer;

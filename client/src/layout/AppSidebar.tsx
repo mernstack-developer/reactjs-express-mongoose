@@ -31,17 +31,17 @@ const navItems: NavItem[] = [
   {
     icon: <GridIcon />,
     name: "Dashboard",
-    subItems: [{ name: "Ecommerce", path: "/", pro: false }],
-  },
-    {
-    icon: <UserIcon />,
-    name: "User List",
-    path: "/users",
+    path: "/dashboard",
   },
   {
     icon: <UserIcon />,
-    name: "Add User",
-    path: "/add-user",
+    name: "My Courses",
+    path: "/my-courses",
+  },
+  {
+    icon: <UserIcon />,
+    name: "Explore Courses",
+    path: "/public-courses",
   },
   {
     icon: <CalenderIcon />,
@@ -52,6 +52,21 @@ const navItems: NavItem[] = [
     icon: <UserCircleIcon />,
     name: "User Profile",
     path: "/profile",
+  },
+  {
+    name: "Administration",
+    icon: <ListIcon />,
+    subItems: [
+      { name: "Dashboard", path: "/admin/dashboard", pro: false },
+      { name: "Courses", path: "/admin/courses", pro: false },
+      { name: "Create Course", path: "/admin/courses/create", pro: false },
+      { name: "Users", path: "/admin/users", pro: false },
+      { name: "Add User", path: "/admin/add-user", pro: false },
+      { name: "Guests", path: "/admin/guests", pro: false },
+      { name: "Permissions", path: "/admin/permissions", pro: false },
+      { name: "Roles", path: "/admin/roles", pro: false },
+      { name: "User Roles", path: "/admin/user-roles", pro: false },
+    ],
   },
   {
     name: "Forms",
@@ -112,6 +127,7 @@ const AppSidebar: React.FC = () => {
     type: "main" | "others";
     index: number;
   } | null>(null);
+  const [navWithCats, setNavWithCats] = useState<NavItem[]>(navItems);
   const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>(
     {}
   );
@@ -147,6 +163,31 @@ const AppSidebar: React.FC = () => {
     }
   }, [location, isActive]);
 
+  // Fetch categories to insert into the sidebar as a submenu
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await fetch(`${import.meta.env.REACT_APP_API_URL || 'http://localhost:3000/api'}/categories`);
+        const json = await res.json();
+        if (!mounted) return;
+        const categories = (json.data || []).filter((c: any) => !c.parent).slice(0, 20); // limit to 20 for sidebar
+        const categorySubItems = categories.map((c: any) => ({ name: c.name, path: `/categories/${c._id}` }));
+
+        // Insert Categories after Explore Courses (find index)
+        const base = [...navItems];
+        const insertIndex = Math.min(3, base.length);
+        const catNavItem: NavItem = { icon: <ListIcon />, name: 'Categories', subItems: categorySubItems };
+        base.splice(insertIndex, 0, catNavItem);
+        setNavWithCats(base);
+      } catch (err) {
+        // ignore - sidebar stays static
+        console.debug('Failed to load categories for sidebar', err);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
+
   useEffect(() => {
     if (openSubmenu !== null) {
       const key = `${openSubmenu.type}-${openSubmenu.index}`;
@@ -174,7 +215,7 @@ const AppSidebar: React.FC = () => {
 
   const renderMenuItems = (items: NavItem[], menuType: "main" | "others") => (
     <ul className="flex flex-col gap-4">
-      {items.map((nav, index) => (
+  {items.map((nav, index) => (
         <li key={nav.name}>
           {nav.subItems ? (
             <button
@@ -360,7 +401,7 @@ const AppSidebar: React.FC = () => {
                   <HorizontaLDots className="size-6" />
                 )}
               </h2>
-              {renderMenuItems(navItems, "main")}
+                {renderMenuItems(navWithCats, "main")}
             </div>
             <div className="">
               <h2

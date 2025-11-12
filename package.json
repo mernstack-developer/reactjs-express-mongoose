@@ -10,7 +10,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "concurrently": "^9.2.1"
+    "concurrently": "^9.2.1",
+    "multer": "^2.0.2"
   },
   "devDependencies": {
     "@types/node": "^24.10.0"

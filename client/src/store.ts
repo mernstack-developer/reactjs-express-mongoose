@@ -4,6 +4,7 @@ import guestsReducer from './features/guests/guestsSlice';
 import notificationsReducer from './features/notifications/notificationsSlice';
 import coursesReducer from './features/courses/coursesSlice';
 import userReducer from './features/auth/userSlice';
+import rolePermissionsReducer from './features/rolePermissions/rolePermissionsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     guests: guestsReducer,
     notifications: notificationsReducer,
     courses: coursesReducer,
+    rolePermissions: rolePermissionsReducer,
   },
 });
 

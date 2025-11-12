@@ -31,7 +31,7 @@ async function loginUser({ email, password }) {
   const ok = await bcrypt.compare(password, user.password);
   if (!ok) throw new Error('Invalid credentials');
 
-  const payload = { id: user._id, email: user.email, role: user.role };
+  const payload = { id: user._id, email: user.email, role: user.role ,permissions: user.role.permissions.map((p) => p.name)};
   const token = jwt.sign(payload, process.env.JWT_SECRET || 'secret', { expiresIn: '7d' });
   return { user, token };
 }
@@ -56,3 +56,16 @@ async function checkAuth(id) {
     return { isAuthenticated,user };
 }
 module.exports = { registerUser, loginUser ,getProfile, checkAuth };  
+
+async function updateProfile(userId, data) {
+  // Only allow certain fields to be updated by the user
+  const allowed = ['firstname','lastname','phone','bio','avatarUrl','email'];
+  const payload = {};
+  allowed.forEach(k => { if (data[k] !== undefined) payload[k] = data[k]; });
+  const user = await User.findByIdAndUpdate(userId, payload, { new: true })
+    .populate({ path: 'role', populate: { path: 'permissions', model: 'Permission' } })
+    .exec();
+  return user;
+}
+
+module.exports = { registerUser, loginUser ,getProfile, checkAuth, updateProfile };  

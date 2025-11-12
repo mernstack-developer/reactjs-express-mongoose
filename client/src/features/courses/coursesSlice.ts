@@ -33,6 +33,56 @@ export const fetchCourseById = createAsyncThunk<Course, string>('courses/fetchCo
   return response.data.data;
 });
 
+// Section related thunks
+export const createSection = createAsyncThunk<any, { courseId?: string; section: Partial<any> }>('courses/createSection', async ({ courseId, section }) => {
+  const payload = { ...section, ...(courseId ? { courseId } : {}) };
+  const response = await apiClient.post<ApiResponse<any>>('/sections', payload);
+  if (!response.data) throw new Error('Failed to create section');
+  return response.data.data;
+});
+
+export const fetchSectionById = createAsyncThunk<any, string>('courses/fetchSectionById', async (id) => {
+  const response = await apiClient.get<ApiResponse<any>>(`/sections/${id}`);
+  if (!response.data) throw new Error('Failed to fetch section');
+  return response.data.data;
+});
+
+export const updateSection = createAsyncThunk<any, { id: string; data: Partial<any> }>('courses/updateSection', async ({ id, data }) => {
+  const response = await apiClient.put<ApiResponse<any>>(`/sections/${id}`, data);
+  if (!response.data) throw new Error('Failed to update section');
+  return response.data.data;
+});
+
+export const deleteSection = createAsyncThunk<any, { id: string; courseId?: string }>('courses/deleteSection', async ({ id, courseId }) => {
+  const url = courseId ? `/sections/${id}?courseId=${courseId}` : `/sections/${id}`;
+  const response = await apiClient.delete<ApiResponse<any>>(url);
+  if (!response.data) throw new Error('Failed to delete section');
+  return { id };
+});
+
+export const duplicateSection = createAsyncThunk<any, { id: string; courseId?: string }>('courses/duplicateSection', async ({ id, courseId }) => {
+  const response = await apiClient.post<ApiResponse<any>>(`/sections/${id}/duplicate`, { courseId });
+  if (!response.data) throw new Error('Failed to duplicate section');
+  return response.data.data;
+});
+
+export const reorderSections = createAsyncThunk<any, { courseId: string; orderedSectionIds: string[] }>('courses/reorderSections', async ({ courseId, orderedSectionIds }) => {
+  const response = await apiClient.post<ApiResponse<any>>(`/sections/course/${courseId}/reorder`, { orderedSectionIds });
+  if (!response.data) throw new Error('Failed to reorder sections');
+  return response.data.data;
+});
+
+export const duplicateCourse = createAsyncThunk<Course, string>('courses/duplicateCourse', async (courseId) => {
+  const course = await apiClient.get<ApiResponse<Course>>(`/courses/${courseId}`);
+  if (!course.data) throw new Error('Failed to fetch course to duplicate');
+  const courseData = course.data.data;
+  const copy = { ...courseData };
+  copy.title = `${copy.title} (copy)`;
+  const response = await apiClient.post<ApiResponse<Course>>('/courses', copy);
+  if (!response.data) throw new Error('Failed to duplicate course');
+  return response.data.data;
+});
+
 export const createCourse = createAsyncThunk<Course, Partial<Course>>('courses/createCourse', async (courseData) => {
   const response = await apiClient.post<ApiResponse<Course>>('/courses', courseData);
   if (!response.data) throw new Error('Failed to create course');

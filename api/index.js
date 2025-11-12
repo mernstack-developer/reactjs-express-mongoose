@@ -5,7 +5,14 @@ const express = require('express');
   const authRoutes = require('./routes/auth.routes');
   const notificationRoutes=require('./routes/notification.routes');
   const courseRoutes = require('./routes/course.routes');
+  const sectionRoutes = require('./routes/section.routes');
+  const permissionRoleRoutes = require('./routes/permission.routes');
+  const uploadRoutes = require('./routes/upload.routes');
   const authMiddleware = require('./middleware/auth.middleware');
+  const activityRoutes = require('./routes/activity.routes');
+  const assignmentRoutes = require('./routes/assignment.routes');
+  const enrollmentRoutes = require('./routes/enrollment.routes');
+  const categoryRoutes = require('./routes/category.routes');
  const dotenv = require('dotenv');
  dotenv.config();
 const app = express();
@@ -30,6 +37,13 @@ app.use(express.json());
  app.use('/api/auth', authRoutes);
  app.use('/api/notifications',notificationRoutes)
  app.use('/api/courses',courseRoutes);
+app.use('/api/sections', sectionRoutes);
+app.use('/api/enrollment', enrollmentRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/activities', activityRoutes);
+app.use('/api/assignments', assignmentRoutes);
+ app.use('/api', authMiddleware, permissionRoleRoutes);
 // A simple API route
 app.get('/api/greeting', (req, res) => {
   res.json({ message: 'Hello from the Express server!' });

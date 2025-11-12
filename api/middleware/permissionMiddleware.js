@@ -9,7 +9,6 @@ const requirePermission = (requiredPermission) => {
     // 2. Look up the permissions associated with the user's role
    // const userPermissions = ROLES_MAP[userRole] || [];
     const userPermissions = req?.user?.permissions || [];
-
     // 3. Check if the required permission is in the user's set of permissions
     if (userPermissions.includes(requiredPermission)) {
       next(); // User is authorized

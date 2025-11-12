@@ -158,7 +158,7 @@ const AppHeader: React.FC = () => {
       {/* topbar middle design for menu and sub menu like courses have different category of courses */ }
       <div className="hidden lg:flex lg:mx-8">    
         <div className="w-full lg:w-auto">
-          <Link to="/courses" className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+          <Link to="/public-courses" className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
             Courses
           </Link>
         </div>  
@@ -194,7 +194,7 @@ const AppHeader: React.FC = () => {
           {user && (
             <div className="flex items-center gap-2">
               <span className="block font-medium text-gray-700 dark:text-gray-400">
-                {user.name}
+                {user.firstname}
               </span>
               <UserDropdown />
             </div>
