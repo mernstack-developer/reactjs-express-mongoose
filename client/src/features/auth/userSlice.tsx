@@ -50,10 +50,10 @@ export const loginUser = createAsyncThunk<
 });
 export const fetchProfile=createAsyncThunk<
 {data:User},// Return type
-{email: string;}// Argument type
->('user/profile',async({email},{rejectWithValue})=>{
+{}// Argument type
+>('user/profile',async(_, {rejectWithValue})=>{
   try{
-  const response = await apiClient.get('/auth/profile', { email });
+  const response = await apiClient.get('/auth/profile');
   return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.message || 'Login failed');

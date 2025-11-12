@@ -90,6 +90,14 @@ async function unregisterUserFromCourse(userId, courseId) {
     
     return await Course.findById(courseId).lean();
 }
+async function getCoursesByUser(userId) {
+    return await Course.find({ registeredUsers: userId })
+        .populate({
+            path: 'sections',
+            populate: { path: 'activities' }
+        })
+        .lean();
+}
 
 module.exports = {
     createCourse,
@@ -103,4 +111,5 @@ module.exports = {
     getPublicCourses,
     registerUserForCourse,
     unregisterUserFromCourse,
+    getCoursesByUser
 };

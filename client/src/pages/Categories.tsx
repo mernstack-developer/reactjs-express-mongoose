@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useAppDispatch, useAppSelector } from '../hooks';
+import { fetchCategories } from '../features/categories/categoriesSlice';
 import { Category } from '../types/types';
 import { useNavigate } from 'react-router-dom';
 import Search from '../components/common/Search';
@@ -7,9 +8,10 @@ import Sort, { SortOption } from '../components/common/Sort';
 import Pagination from '../components/common/Pagination';
 
 export default function CategoriesPage() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
+  const categories = useAppSelector((state: any) => state.categories?.data as Category[] || []);
+  const loading = useAppSelector((state: any) => state.categories?.loading as boolean);
+  const error = useAppSelector((state: any) => state.categories?.error as string | null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
@@ -23,28 +25,13 @@ export default function CategoriesPage() {
     { label: 'Updated', value: 'updatedAt' },
   ];
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setLoading(true);
-        const res = await axios.get(`${import.meta.env.REACT_APP_API_URL || 'http://localhost:3000/api'}/categories`);
-        setCategories(res.data.data || []);
-        setCurrentPage(1);
-      } catch (err) {
-        console.error(err);
-        setError('Failed to load categories');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCategories();
-  }, []);
+  useEffect(() => { dispatch(fetchCategories()); }, [dispatch]);
 
   // Filter to top-level categories only
-  const topLevelCategories = categories.filter(c => !c.parent);
+  const topLevelCategories = (categories || []).filter((c: Category) => !c.parent);
 
   // Filter by search query
-  const filteredCategories = topLevelCategories.filter(cat =>
+  const filteredCategories = topLevelCategories.filter((cat: Category) =>
     cat.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 

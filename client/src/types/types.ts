@@ -24,7 +24,7 @@ export interface User {
   phone?: string;
   bio?: string;
   email: string;
-  role: Role | string; // Can be Role object or role ID
+  role:  string; // Can be Role object or role ID
   registeredCourses?: string[];
   createdAt: string;
   updatedAt: string;

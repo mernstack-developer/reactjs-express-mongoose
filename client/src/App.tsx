@@ -87,9 +87,9 @@ export default function App() {
               <Route path="/admin/courses/create" element={<CreateCourse />} />
               <Route path="/admin/courses/:id/editor" element={<CourseEditor />} />
               <Route path="/admin/categories" element={<AdminCategories />} />
-              <Route path="/users/:userId/enrolled-courses" element={<UserEnrolledCourses />} />
-              <Route path="/courses/:courseId/enrollments" element={<CourseEnrollments />} />
-              <Route path="/roles/:roleId/users" element={<UsersByRole />} />
+              <Route path="/admin/users/:userId/enrolled-courses" element={<UserEnrolledCourses />} />
+              <Route path="/admin/courses/:courseId/enrollments" element={<CourseEnrollments />} />
+              <Route path="/admin/roles/:roleId/users" element={<UsersByRole />} />
             </Route>
 
             {/* UI Component Pages (visible for testing) */}

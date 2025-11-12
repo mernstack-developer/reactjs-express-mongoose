@@ -14,7 +14,7 @@ export default function UserMetaCard() {
   const dispatch = useAppDispatch();
   const { data: user } = useAppSelector((state: RootState) => state.user) as any;
   const [form, setForm] = useState<any>({});
-  const [uploading, setUploading] = useState(false);
+  //const [ setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
   useEffect(() => { if (user) setForm(user); }, [user]);
   const handleSave = () => {
@@ -239,13 +239,13 @@ export default function UserMetaCard() {
                       <input ref={fileRef} type="file" onChange={async (e)=>{
                         const f = e.target.files && e.target.files[0];
                         if (!f) return;
-                        setUploading(true);
+                        //setUploading(true);
                         try {
                           const resp = await uploadFileToServer(f);
                           const url = resp?.data?.url || resp?.data?.downloadUrl || resp?.data?.publicUrl || resp?.data?.key || resp?.data?.object || resp?.url || resp.data;
                           setForm({...form, avatarUrl: url});
                         } catch (err) { console.error(err); alert('Upload failed'); }
-                        setUploading(false);
+                       // setUploading(false);
                       }} />
                       <div>{form?.avatarUrl ? <img className="w-12 h-12 rounded-full" src={form.avatarUrl} /> : null}</div>
                     </div>

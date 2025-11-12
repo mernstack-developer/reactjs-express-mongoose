@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useAppSelector } from '../hooks';
+import { useAppSelector, useAppDispatch } from '../hooks';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { fetchPublicCourses, enrollInCourse } from '../features/courses/coursesSlice';
 import PageBreadCrumb from '../components/common/PageBreadCrumb';
 import type { Course } from '../types/types';
 
@@ -19,11 +19,9 @@ export default function PublicCourses() {
   const navigate = useNavigate();
   const user = useAppSelector(state => state.user.data);
   const isAuthenticated = useAppSelector(state => state.user.isAuthenticated);
-  
-  const [courses, setCourses] = useState<Course[]>([]);
+  const dispatch = useAppDispatch();
+  const { data: courses, loading, error } = useAppSelector((state: any) => state.courses);
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [enrollingCourseId, setEnrollingCourseId] = useState<string | null>(null);
   const [enrollmentModal, setEnrollmentModal] = useState<{
     visible: boolean;
@@ -40,26 +38,10 @@ export default function PublicCourses() {
     searchTerm: '',
   });
 
-  // Fetch public courses
+  // Fetch public courses from Redux
   useEffect(() => {
-    const fetchPublicCourses = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(
-          `${import.meta.env.REACT_APP_API_URL || 'http://localhost:3000/api'}/enrollment/public-courses`
-        );
-        setCourses(response.data.data || []);
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching public courses:', err);
-        setError('Failed to load courses. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPublicCourses();
-  }, []);
+    dispatch(fetchPublicCourses());
+  }, [dispatch]);
 
   // Apply filters and search
   useEffect(() => {
@@ -75,13 +57,12 @@ export default function PublicCourses() {
     // Filter by search term
     if (filters.searchTerm) {
       const searchLower = filters.searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        course =>
-          course.title.toLowerCase().includes(searchLower) ||
-          course.description?.toLowerCase().includes(searchLower) ||
-          course.tags?.some(tag =>
-            tag.toLowerCase().includes(searchLower)
-          )
+      filtered = filtered.filter((course: Course) =>
+        course.title.toLowerCase().includes(searchLower) ||
+        course.description?.toLowerCase().includes(searchLower) ||
+        (course.tags || []).some((tag: string) =>
+          tag.toLowerCase().includes(searchLower)
+        )
       );
     }
 
@@ -112,41 +93,16 @@ export default function PublicCourses() {
       navigate('/login');
       return;
     }
-
     try {
       setEnrollingCourseId(courseId);
-      const token = localStorage.getItem('token');
-      const response = await axios.post(
-        `${
-          import.meta.env.REACT_APP_API_URL ||
-          'http://localhost:3000/api'
-        }/enrollment/enroll/${courseId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.status === 200 || response.status === 201) {
-        // Update course to show enrolled status
-        setCourses(prev =>
-          prev.map(c =>
-            c._id === courseId
-              ? { ...c, registeredUsers: [...(c.registeredUsers || []), user?._id] as any }
-              : c
-          )
-        );
-        setEnrollmentModal({ visible: false, course: null });
-        // Show success message
-        alert('Successfully enrolled in the course!');
-      }
+      await dispatch(enrollInCourse(courseId)).unwrap();
+      // Optimistically update UI by dispatching fetchPublicCourses again
+      dispatch(fetchPublicCourses());
+      setEnrollmentModal({ visible: false, course: null });
+      alert('Successfully enrolled in the course!');
     } catch (err: any) {
       console.error('Error enrolling in course:', err);
-      const errorMessage =
-        err.response?.data?.message || 'Failed to enroll in course';
-      alert(errorMessage);
+      alert(err?.message || 'Failed to enroll in course');
     } finally {
       setEnrollingCourseId(null);
     }

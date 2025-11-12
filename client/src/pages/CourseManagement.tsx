@@ -237,7 +237,7 @@ const CourseManagement: React.FC = () => {
                   </td>
                   <td className="p-3 text-center">
                     <button
-                      onClick={() => navigate(`/course/${course._id}/enrollments`)}
+                      onClick={() => navigate(`/admin/courses/${course._id}/enrollments`)}
                       className="inline-flex items-center justify-center rounded-full bg-green-100 px-2.5 py-0.5 text-sm font-medium text-green-800 hover:bg-green-200 dark:bg-green-900 dark:text-green-200 dark:hover:bg-green-800"
                     >
                       {(course.registeredUsers || []).length}
@@ -246,7 +246,7 @@ const CourseManagement: React.FC = () => {
                   <td className="p-3">
                     <div className="flex gap-2">
                       <button
-                        onClick={() => navigate(`/course/${course._id}/edit`)}
+                        onClick={() => navigate(`/admin/courses/${course._id}/editor`)}
                         className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600"
                       >
                         Edit

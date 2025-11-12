@@ -11,7 +11,7 @@ import { RootState } from "../store";
 const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
 // const {user } = useAuth();
-  const { isAuthenticated, data:user} = useAppSelector((state: RootState) => state.user);
+  const {  data:user} = useAppSelector((state: RootState) => state.user);
 
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
 

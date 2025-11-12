@@ -49,10 +49,19 @@ async function deleteCourse(req, res) {
         res.status(500).json({ error: error.message });
     }
 }
+async function getCoursesByUser(req, res) {
+    try {
+        const userId = req.params.userId;
+        const courses = await courseService.getCoursesByUser(userId);
+        res.json({ data: courses });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
 async function registerUserForCourse(req, res) {
     try {
         const { userId, courseId } = req.body;
-
+console.log(userId, courseId);
         const user = await userService.getUserById(userId);
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
@@ -78,4 +87,5 @@ module.exports = {
     registerUserForCourse,
     updateCourse,
     deleteCourse,
+    getCoursesByUser
 };

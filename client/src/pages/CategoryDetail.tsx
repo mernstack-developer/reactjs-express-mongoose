@@ -1,35 +1,26 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '../hooks';
+import { fetchCategoryById } from '../features/categories/categoriesSlice';
 import type { Category, Course } from '../types/types';
 
 export default function CategoryDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
+  const selected = useAppSelector((state: any) => state.categories?.selectedCategory);
+  const loading = useAppSelector((state: any) => state.categories?.loading as boolean);
+  const error = useAppSelector((state: any) => state.categories?.error as string | null);
 
   useEffect(() => {
     if (!id) return;
-    const fetch = async () => {
-      try {
-        setLoading(true);
-        const res = await axios.get(`${import.meta.env.REACT_APP_API_URL || 'http://localhost:3000/api'}/categories/${id}`);
-        setData(res.data.data);
-      } catch (err) {
-        console.error(err);
-        setError('Failed to load category');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetch();
-  }, [id]);
+    dispatch(fetchCategoryById(id));
+  }, [id, dispatch]);
 
   if (loading) return <div className="p-8">Loading...</div>;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
 
+  const data = selected || {};
   const subcats: Category[] = data.subcategories || [];
   const courses: Course[] = data.courses || [];
 

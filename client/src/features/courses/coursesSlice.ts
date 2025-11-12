@@ -27,7 +27,7 @@ export const fetchCourses = createAsyncThunk<Course[]>('courses/fetchCourses', a
 
 export const fetchCourseById = createAsyncThunk<Course, string>('courses/fetchCourseById',
    async (_id) => {
-   const response = await apiClient.get<ApiResponse<Course>>(`/courses/${_id}`);
+   const response = await apiClient.get<ApiResponse<Course>>(`/courses/view/${_id}`);
    console.log('Fetched Course by ID Response:', response.data.data);
   // if (!response.data) throw new Error('Failed to fetch course');
   return response.data.data;
@@ -90,13 +90,13 @@ export const createCourse = createAsyncThunk<Course, Partial<Course>>('courses/c
 });
 
 export const updateCourse = createAsyncThunk<Course, { id: string; data: Partial<Course> }>('courses/updateCourse', async ({ id, data }) => {
-  const response = await apiClient.put<ApiResponse<Course>>(`/courses/${id}`, data);
+  const response = await apiClient.put<ApiResponse<Course>>(`/courses/edit/${id}`, data);
   if (!response.data) throw new Error('Failed to update course');
   return response.data.data;
 });
 
 export const deleteCourse = createAsyncThunk<void, string>('courses/deleteCourse', async (id) => {
-  const response = await apiClient.delete<ApiResponse<void>>(`/courses/${id}`);
+  const response = await apiClient.delete<ApiResponse<void>>(`/courses/delete/${id}`);
   if (!response.data) throw new Error('Failed to delete course');
 
   return;
@@ -114,14 +114,28 @@ export const unregisterFromCourse = createAsyncThunk<void, string>('courses/unre
 
   return;
 });
-export const fetchRegisteredCourses = createAsyncThunk<Course[]>(
+export const fetchRegisteredCourses = createAsyncThunk<Course[],{ userId: string}>(
   'courses/fetchRegisteredCourses', 
-  async () => {
-    const response = await apiClient.get<ApiResponse<Course[]>>('/courses/registered');
+  async ({ userId }) => {
+    const response = await apiClient.get<ApiResponse<Course[]>>(`/courses/registered/${userId}`);
     if (!response.data) throw new Error('Failed to fetch registered courses');
     return response.data.data;
   }
 );
+
+// Public courses exposed by enrollment controller
+export const fetchPublicCourses = createAsyncThunk<Course[]>('courses/fetchPublicCourses', async () => {
+  const response = await apiClient.get<ApiResponse<Course[]>>('/enrollment/public-courses');
+  if (!response.data) throw new Error('Failed to fetch public courses');
+  return response.data.data;
+});
+
+// Enroll a user into a course via the enrollment endpoint
+export const enrollInCourse = createAsyncThunk<void, string>('courses/enrollInCourse', async (courseId) => {
+  const response = await apiClient.post<ApiResponse<any>>(`/enrollment/enroll/${courseId}`);
+  if (!response.data) throw new Error('Failed to enroll in course');
+  return;
+});
 export const coursesSlice=createSlice({
   name:'courses',
  initialState,
@@ -141,6 +155,21 @@ export const coursesSlice=createSlice({
     .addCase(fetchCourses.rejected,(state,action)=>{
       state.loading=false;
       state.error=action.error.message || 'Failed to fetch courses';
+      state.selectedCourse = null;
+    })
+    .addCase(fetchPublicCourses.pending,(state)=>{
+      state.loading=true;
+      state.error=null;
+      state.selectedCourse = null;
+    })
+    .addCase(fetchPublicCourses.fulfilled,(state,action)=>{
+      state.loading=false;
+      state.data=action.payload;
+      state.selectedCourse = null;
+    })
+    .addCase(fetchPublicCourses.rejected,(state,action)=>{
+      state.loading=false;
+      state.error=action.error.message || 'Failed to fetch public courses';
       state.selectedCourse = null;
     })
     .addCase(fetchRegisteredCourses.pending,(state)=>{
