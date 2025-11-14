@@ -1,92 +1,199 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../hooks';
-import { fetchCourseById, createSection, deleteSection, duplicateSection } from '../features/courses/coursesSlice';
-import SectionCard from '../components/SectionCard';
+import { fetchCourseById, createSection } from '../features/courses/coursesSlice';
+import SectionEditor from '../components/CourseEditor/SectionEditor';
 
 const CourseEditor: React.FC = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { selectedCourse, loading } = useAppSelector((state: any) => state.courses);
+  const { selectedCourse: course, loading } = useAppSelector((state: any) => state.courses);
   const [editMode, setEditMode] = useState(false);
-  const [collapseAll, setCollapseAll] = useState(false);
 
   useEffect(() => {
-    if (id) dispatch(fetchCourseById(id));
+    if (id) {
+      dispatch(fetchCourseById(id));
+    }
   }, [id, dispatch]);
 
-  if (loading) return <div>Loading...</div>;
-  if (!selectedCourse) return <div>No course found</div>;
-
-  const onAddSection = async () => {
-    const title = prompt('Section title') || 'Untitled Section';
-    const section = { title, description: '' };
-    await dispatch(createSection({ courseId: selectedCourse._id, section }));
-    await dispatch(fetchCourseById(selectedCourse._id));
+  const handleAddSection = async () => {
+    const title = prompt('Enter section title:') || 'Untitled Section';
+    if (!course) return;
+    try {
+      await dispatch(createSection({ courseId: course._id, section: { title, description: '' } }));
+      // Refresh course data after creating section
+      dispatch(fetchCourseById(course._id));
+    } catch (error) {
+      console.error('Failed to create section:', error);
+    }
   };
 
-  const onDuplicate = async (sectionId: string) => {
-    await dispatch(duplicateSection({ id: sectionId, courseId: selectedCourse._id }));
-    await dispatch(fetchCourseById(selectedCourse._id));
+  const handleRefreshCourse = () => {
+    if (course) {
+      dispatch(fetchCourseById(course._id));
+    }
   };
 
-  const onDelete = async (sectionId: string) => {
-    if (!confirm('Delete this section and its contents?')) return;
-    await dispatch(deleteSection({ id: sectionId, courseId: selectedCourse._id }));
-    await dispatch(fetchCourseById(selectedCourse._id));
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="text-xl text-gray-600 dark:text-gray-400">Loading course...</div>
+      </div>
+    );
+  }
 
-  // Reordering handled via UI interactions; call reorderSections when needed
+  if (!course) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="text-center">
+          <p className="text-xl text-gray-600 dark:text-gray-400 mb-4">Course not found</p>
+          <button
+            onClick={() => navigate(-1)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold">{selectedCourse.title} - Editor</h1>
-        <div>
-          <button className="mr-2 btn" onClick={() => setEditMode(!editMode)}>{editMode ? 'Turn editing off' : 'Turn editing on'}</button>
-          <button className="btn" onClick={onAddSection}>Add section</button>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 sticky top-0 z-10 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              title="Go back"
+            >
+              ←
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                {course.title}
+              </h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Course Editor</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setEditMode(!editMode)}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                editMode
+                  ? 'bg-red-600 hover:bg-red-700 text-white'
+                  : 'bg-green-600 hover:bg-green-700 text-white'
+              }`}
+            >
+              {editMode ? '🔒 Turn Editing Off' : '🔓 Turn Editing On'}
+            </button>
+
+            {editMode && (
+              <button
+                onClick={handleAddSection}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+              >
+                + Add Section
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="flex gap-4">
-        {/* Left: Course index drawer */}
-        <aside className="w-64 border p-2 h-[70vh] overflow-auto">
-          <h3 className="font-semibold mb-2">Course Index</h3>
-          <button className="text-sm underline mb-2" onClick={() => setCollapseAll(!collapseAll)}>{collapseAll ? 'Expand all' : 'Collapse all'}</button>
-          <ul>
-            {selectedCourse.sections?.map((s: any, idx: number) => (
-              <li key={s._id} className="mb-1">
-                <a href={`#section-${s._id}`} className="text-blue-600">{idx + 1}. {s.title || s.sectionTitle || 'Untitled'}</a>
-              </li>
-            ))}
-          </ul>
-        </aside>
-
-        {/* Main course area */}
-        <main className="flex-1">
-          {selectedCourse.sections?.map((section: any, idx: number) => (
-            <div id={`section-${section._id}`} key={section._id} className="mb-4 border rounded p-3">
-              <div className="flex justify-between items-center">
-                <h2 className="font-semibold">{idx + 1}. {section.title || section.sectionTitle}</h2>
-                <div className="flex gap-2">
-                  {editMode && (
-                    <>
-                      <button className="btn" onClick={() => onDuplicate(section._id)}>Duplicate</button>
-                      <button className="btn" onClick={() => onDelete(section._id)}>Delete</button>
-                    </>
-                  )}
+      {/* Main Content */}
+      <div className="max-w-5xl mx-auto p-6">
+        {/* Course Overview Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-8 border border-gray-200 dark:border-gray-700">
+          <div className="flex gap-6">
+            {course.imageUrl && (
+              <img
+                src={course.imageUrl}
+                alt={course.title}
+                className="w-32 h-32 object-cover rounded-lg flex-shrink-0"
+              />
+            )}
+            <div className="flex-1">
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                {course.title}
+              </h2>
+              <p className="text-gray-700 dark:text-gray-300 mb-4">
+                {course.description}
+              </p>
+              <div className="grid grid-cols-4 gap-4 text-sm">
+                <div>
+                  <p className="text-gray-500 dark:text-gray-400">Sections</p>
+                  <p className="font-semibold text-gray-900 dark:text-white">
+                    {course.sections?.length || 0}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 dark:text-gray-400">Enrolled</p>
+                  <p className="font-semibold text-gray-900 dark:text-white">
+                    {course.registeredUsers?.length || 0}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 dark:text-gray-400">Duration</p>
+                  <p className="font-semibold text-gray-900 dark:text-white">
+                    {course.duration} hours
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 dark:text-gray-400">Status</p>
+                  <p className="font-semibold text-green-600 dark:text-green-400">
+                    {editMode ? '✏️ Editing' : '👁️ Viewing'}
+                  </p>
                 </div>
               </div>
-              <SectionCard section={section} editable={editMode} />
             </div>
-          ))}
-        </main>
+          </div>
+        </div>
 
-        {/* Right: Block drawer (simplified) */}
-        <aside className="w-72 border p-2">
-          <h3 className="font-semibold mb-2">Block drawer</h3>
-          <p className="text-sm text-gray-600">Add blocks when edit mode is enabled.</p>
-        </aside>
+        {/* Sections */}
+        {editMode ? (
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              Course Structure
+            </h2>
+            {course.sections && course.sections.length > 0 ? (
+              course.sections.map((section: any, idx: number) => (
+                <SectionEditor
+                  key={section._id}
+                  section={section}
+                  courseId={course._id}
+                  sectionIndex={idx}
+                  onRefresh={handleRefreshCourse}
+                />
+              ))
+            ) : (
+              <div className="text-center py-12 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                <p className="text-gray-600 dark:text-gray-400 mb-4">No sections yet.</p>
+                <button
+                  onClick={handleAddSection}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium"
+                >
+                  Create First Section
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 text-center">
+            <p className="text-gray-700 dark:text-gray-300 mb-4">
+              Turn on editing to modify sections, activities, and course content.
+            </p>
+            <button
+              onClick={() => setEditMode(true)}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium"
+            >
+              Enable Editing
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

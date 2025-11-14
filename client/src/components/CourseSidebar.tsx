@@ -78,7 +78,7 @@ export default function CourseSidebar({ course, activeActivityId }: CourseSideba
                       />
                     </svg>
                     <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                      {index + 1}. {section.sectionTitle}
+                      {index + 1}. {section.title}
                     </span>
                   </div>
                   <span className="ml-2 text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">

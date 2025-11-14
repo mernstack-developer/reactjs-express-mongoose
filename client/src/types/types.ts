@@ -26,6 +26,22 @@ export interface User {
   email: string;
   role:  string; // Can be Role object or role ID
   registeredCourses?: string[];
+  avatarUrl?: string;
+  social?: {
+    facebook?: string;
+    x?: string;
+    linkedin?: string;
+    instagram?: string;
+  };
+  address?: {
+    street?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    country?: string;
+    taxId?: string;
+  };
+  preferences?: Record<string, any>;
   createdAt: string;
   updatedAt: string;
 }
@@ -39,7 +55,8 @@ export interface ContentBlock {
 }
 export interface CourseSection {
   _id: string;
-  sectionTitle: string;
+  title: string;
+  description?: string;
   contents: ContentBlock[];
   activities?: any[];
 }

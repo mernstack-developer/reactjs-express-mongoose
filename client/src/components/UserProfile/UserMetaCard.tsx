@@ -3,33 +3,97 @@ import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useAppDispatch, useAppSelector } from "../../hooks";
 import { RootState } from "../../store";
 import { uploadFileToServer } from '../../utils/upload';
-import { apiClient } from '../../utils/api';
-import { checkAuthStatus } from '../../features/auth/userSlice';
+import { updateProfile } from '../../features/auth/userSlice';
+import * as z from "zod";
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+
 export default function UserMetaCard() {
   const { isOpen, openModal, closeModal } = useModal();
   const dispatch = useAppDispatch();
   const { data: user } = useAppSelector((state: RootState) => state.user) as any;
-  const [form, setForm] = useState<any>({});
-  //const [ setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
-  useEffect(() => { if (user) setForm(user); }, [user]);
-  const handleSave = () => {
-    // Save profile directly via API then refresh auth state
-    (async () => {
-      try {
-        await apiClient.put('/auth/profile', form);
-        // refresh auth state
-        dispatch(checkAuthStatus());
-        closeModal();
-      } catch (err: any) {
-        alert(err?.message || 'Failed to save');
-      }
-    })();
-  };
+
+  // Zod schema for profile
+  const profileSchema = z.object({
+    firstname: z.string().min(1, 'First name is required'),
+    lastname: z.string().min(1, 'Last name is required'),
+    email: z.string().email('Invalid email'),
+    phone: z.string().optional().nullable(),
+    bio: z.string().optional().nullable(),
+    avatarUrl: z.string().optional().nullable(),
+    social: z.object({
+      facebook: z.string().optional().nullable(),
+      x: z.string().optional().nullable(),
+      linkedin: z.string().optional().nullable(),
+      instagram: z.string().optional().nullable(),
+    }).optional().nullable(),
+    address: z.object({
+      street: z.string().optional().nullable(),
+      city: z.string().optional().nullable(),
+      state: z.string().optional().nullable(),
+      postalCode: z.string().optional().nullable(),
+      country: z.string().optional().nullable(),
+    }).optional().nullable(),
+  });
+
+  type ProfileForm = z.infer<typeof profileSchema>;
+
+  const { control, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm<ProfileForm>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      firstname: '',
+      lastname: '',
+      email: '',
+      phone: '',
+      bio: '',
+      avatarUrl: '',
+      social: { facebook: '', x: '', linkedin: '', instagram: '' },
+      address: { street: '', city: '', state: '', postalCode: '', country: '' },
+    }
+  });
+
+  useEffect(() => {
+    if (user) {
+      // populate the form when user data is available
+      reset({
+        firstname: user.firstname || '',
+        lastname: user.lastname || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        bio: user.bio || '',
+        avatarUrl: user.avatarUrl || user.avatar || '',
+        social: {
+          facebook: user.social?.facebook || '',
+          x: user.social?.x || '',
+          linkedin: user.social?.linkedin || '',
+          instagram: user.social?.instagram || '',
+        },
+        address: {
+          street: user.address?.street || '',
+          city: user.address?.city || '',
+          state: user.address?.state || '',
+          postalCode: user.address?.postalCode || '',
+          country: user.address?.country || '',
+          taxId: user.address?.taxId || '',
+        }
+      });
+    }
+  }, [user, reset]);
+
+  const handleSave = handleSubmit(async (values) => {
+    try {
+      // Dispatch Redux thunk to update profile
+      await dispatch(updateProfile(values)).unwrap();
+      closeModal();
+    } catch (err: any) {
+      alert(err?.message || 'Failed to save');
+    }
+  });
   return (
     <>
       <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
@@ -168,8 +232,8 @@ export default function UserMetaCard() {
               Update your details to keep your profile up-to-date.
             </p>
           </div>
-          <form className="flex flex-col">
-            <div className="custom-scrollbar h-[450px] overflow-y-auto px-2 pb-3">
+          <form className="flex flex-col" onSubmit={handleSave}>
+            <div className="custom-scrollbar h-[520px] overflow-y-auto px-2 pb-3">
               <div>
                 <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
                   Social Links
@@ -178,28 +242,40 @@ export default function UserMetaCard() {
                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                   <div>
                     <Label>Facebook</Label>
-                    <Input
-                      type="text"
-                      value="https://www.facebook.com/PimjoHQ"
+                    <Controller
+                      control={control}
+                      name="social.facebook"
+                      render={({ field }) => (
+                        <Input type="text" value={field.value || ''} onChange={field.onChange} />
+                      )}
                     />
                   </div>
 
                   <div>
                     <Label>X.com</Label>
-                    <Input type="text" value="https://x.com/PimjoHQ" />
+                    <Controller
+                      control={control}
+                      name="social.x"
+                      render={({ field }) => <Input type="text" value={field.value || ''} onChange={field.onChange} />}
+                    />
                   </div>
 
                   <div>
                     <Label>Linkedin</Label>
-                    <Input
-                      type="text"
-                      value="https://www.linkedin.com/company/pimjo"
+                    <Controller
+                      control={control}
+                      name="social.linkedin"
+                      render={({ field }) => <Input type="text" value={field.value || ''} onChange={field.onChange} />}
                     />
                   </div>
 
                   <div>
                     <Label>Instagram</Label>
-                    <Input type="text" value="https://instagram.com/PimjoHQ" />
+                    <Controller
+                      control={control}
+                      name="social.instagram"
+                      render={({ field }) => <Input type="text" value={field.value || ''} onChange={field.onChange} />}
+                    />
                   </div>
                 </div>
               </div>
@@ -211,27 +287,50 @@ export default function UserMetaCard() {
                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                   <div className="col-span-2 lg:col-span-1">
                     <Label>First Name</Label>
-                    <Input type="text" value={form?.firstname || ''} onChange={(e:any)=>setForm({...form, firstname: e.target.value})} />
+                    <Controller
+                      control={control}
+                      name="firstname"
+                      render={({ field }) => <Input type="text" value={field.value || ''} onChange={field.onChange} />}
+                    />
+                    {errors.firstname && <p className="text-sm text-red-600 mt-1">{errors.firstname.message}</p>}
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
                     <Label>Last Name</Label>
-                    <Input type="text" value={form?.lastname || ''} onChange={(e:any)=>setForm({...form, lastname: e.target.value})} />
+                    <Controller
+                      control={control}
+                      name="lastname"
+                      render={({ field }) => <Input type="text" value={field.value || ''} onChange={field.onChange} />}
+                    />
+                    {errors.lastname && <p className="text-sm text-red-600 mt-1">{errors.lastname.message}</p>}
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
                     <Label>Email Address</Label>
-                    <Input type="text" value={form?.email || ''} onChange={(e:any)=>setForm({...form, email: e.target.value})} />
+                    <Controller
+                      control={control}
+                      name="email"
+                      render={({ field }) => <Input type="text" value={field.value || ''} onChange={field.onChange} />}
+                    />
+                    {errors.email && <p className="text-sm text-red-600 mt-1">{errors.email.message}</p>}
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
                     <Label>Phone</Label>
-                    <Input type="text" value={form?.phone || ''} onChange={(e:any)=>setForm({...form, phone: e.target.value})} />
+                    <Controller
+                      control={control}
+                      name="phone"
+                      render={({ field }) => <Input type="text" value={field.value || ''} onChange={field.onChange} />}
+                    />
                   </div>
 
                   <div className="col-span-2">
                     <Label>Bio</Label>
-                    <Input type="text" value={form?.bio || ''} onChange={(e:any)=>setForm({...form, bio: e.target.value})} />
+                    <Controller
+                      control={control}
+                      name="bio"
+                      render={({ field }) => <Input type="text" value={field.value || ''} onChange={field.onChange} />}
+                    />
                   </div>
                   <div className="col-span-2">
                     <Label>Avatar</Label>
@@ -239,15 +338,47 @@ export default function UserMetaCard() {
                       <input ref={fileRef} type="file" onChange={async (e)=>{
                         const f = e.target.files && e.target.files[0];
                         if (!f) return;
-                        //setUploading(true);
                         try {
                           const resp = await uploadFileToServer(f);
                           const url = resp?.data?.url || resp?.data?.downloadUrl || resp?.data?.publicUrl || resp?.data?.key || resp?.data?.object || resp?.url || resp.data;
-                          setForm({...form, avatarUrl: url});
+                          // set avatarUrl into form
+                          setValue('avatarUrl' as any, url);
                         } catch (err) { console.error(err); alert('Upload failed'); }
-                       // setUploading(false);
                       }} />
-                      <div>{form?.avatarUrl ? <img className="w-12 h-12 rounded-full" src={form.avatarUrl} /> : null}</div>
+                      <div>
+                        <Controller
+                          control={control}
+                          name="avatarUrl"
+                          render={({ field }) => (field.value ? <img className="w-12 h-12 rounded-full" src={field.value} /> : <></>)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Address fields */}
+                  <div className="col-span-2 mt-4">
+                    <h6 className="mb-3 text-sm font-medium">Address</h6>
+                    <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                      <div>
+                        <Label>Street</Label>
+                        <Controller control={control} name="address.street" render={({ field }) => <Input value={field.value || ''} onChange={field.onChange} />} />
+                      </div>
+                      <div>
+                        <Label>City</Label>
+                        <Controller control={control} name="address.city" render={({ field }) => <Input value={field.value || ''} onChange={field.onChange} />} />
+                      </div>
+                      <div>
+                        <Label>State</Label>
+                        <Controller control={control} name="address.state" render={({ field }) => <Input value={field.value || ''} onChange={field.onChange} />} />
+                      </div>
+                      <div>
+                        <Label>Postal Code</Label>
+                        <Controller control={control} name="address.postalCode" render={({ field }) => <Input value={field.value || ''} onChange={field.onChange} />} />
+                      </div>
+                      <div className="col-span-2">
+                        <Label>Country</Label>
+                        <Controller control={control} name="address.country" render={({ field }) => <Input value={field.value || ''} onChange={field.onChange} />} />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -258,7 +389,7 @@ export default function UserMetaCard() {
                 Close
               </Button>
               <Button size="sm" onClick={handleSave}>
-                Save Changes
+                {isSubmitting ? 'Saving...' : 'Save Changes'}
               </Button>
             </div>
           </form>

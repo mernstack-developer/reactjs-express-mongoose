@@ -59,7 +59,11 @@ module.exports = { registerUser, loginUser ,getProfile, checkAuth };
 
 async function updateProfile(userId, data) {
   // Only allow certain fields to be updated by the user
-  const allowed = ['firstname','lastname','phone','bio','avatarUrl','email'];
+  const allowed = [
+    'firstname', 'lastname', 'phone', 'bio', 'avatarUrl', 'email',
+    // new profile fields
+    'social', 'address', 'preferences'
+  ];
   const payload = {};
   allowed.forEach(k => { if (data[k] !== undefined) payload[k] = data[k]; });
   const user = await User.findByIdAndUpdate(userId, payload, { new: true })

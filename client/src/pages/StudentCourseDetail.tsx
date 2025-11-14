@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../hooks';
 import { fetchCourseById, registerForCourse } from '../features/courses/coursesSlice';
-import { useAuth } from '../hooks/useAuth';
 import CourseSidebar from '../components/CourseSidebar';
+import RichTextRenderer from '../components/RichTextRenderer/RichTextRenderer';
 import { CourseSection, ContentBlock } from '../types/types';
 
 interface Activity {
@@ -63,9 +63,9 @@ const ContentBlockRenderer: React.FC<{ content: ContentBlock }> = ({ content }) 
 
 const ActivityRenderer: React.FC<{
   activity: Activity;
-  sectionTitle: string;
+  title: string;
   enrollmentStatus: boolean;
-}> = ({ activity, sectionTitle, enrollmentStatus }) => {
+}> = ({ activity, title, enrollmentStatus }) => {
   const navigate = useNavigate();
 
   const handleActivityClick = (activityType: string) => {
@@ -104,7 +104,7 @@ const ActivityRenderer: React.FC<{
             {activity.title}
           </h3>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Section: {sectionTitle} • Type: {activity.type}
+            Section: {title} • Type: {activity.type}
           </p>
         </div>
       </div>
@@ -133,12 +133,13 @@ const SectionRenderer: React.FC<{
   enrollmentStatus: boolean;
 }> = ({ section, enrollmentStatus }) => {
   const [isExpanded, setIsExpanded] = useState(true);
-
+  console.log('Rendering section:', section);
   return (
     <div className="section-block mb-8">
+    
       <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200 dark:border-gray-700">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-          {section.sectionTitle}
+          {section?.title || 'Untitled Section'}
         </h2>
         <button
           onClick={() => setIsExpanded(!isExpanded)}
@@ -150,6 +151,13 @@ const SectionRenderer: React.FC<{
 
       {isExpanded && (
         <>
+          {/* Section Description */}
+          {section.description && (
+            <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <RichTextRenderer content={section.description} />
+            </div>
+          )}
+
           {/* Content Blocks */}
           {section.contents && section.contents.length > 0 && (
             <div className="mb-8">
@@ -166,7 +174,7 @@ const SectionRenderer: React.FC<{
                 <ActivityRenderer
                   key={activity._id}
                   activity={activity}
-                  sectionTitle={section.sectionTitle}
+                  title={section.title}
                   enrollmentStatus={enrollmentStatus}
                 />
               ))}
@@ -188,9 +196,10 @@ export default function StudentCourseDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { user } = useAuth();
+
   const { selectedCourse: course, loading, error } = useAppSelector((state) => state.courses);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { data: user } = useAppSelector((state) => state.user);
 
   useEffect(() => {
     if (id) {
@@ -199,7 +208,7 @@ export default function StudentCourseDetail() {
   }, [id, dispatch]);
 
   const isEnrolled = course && user && course.registeredUsers.includes(user._id);
-
+console.log('course.registeredUsers',course?.registeredUsers +''+'user._id='+user)
   const handleEnroll = () => {
     if (course) {
       dispatch(registerForCourse(course._id));

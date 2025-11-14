@@ -21,14 +21,12 @@ const initialState: CoursesState = {
 export const fetchCourses = createAsyncThunk<Course[]>('courses/fetchCourses', async () => {
   const response = await apiClient.get<ApiResponse<Course[]>>('/courses');
   if (!response.data) throw new Error('Failed to fetch courses');
-  console.log('Fetched Courses:', response);
   return response.data.data;
 });
 
 export const fetchCourseById = createAsyncThunk<Course, string>('courses/fetchCourseById',
    async (_id) => {
    const response = await apiClient.get<ApiResponse<Course>>(`/courses/view/${_id}`);
-   console.log('Fetched Course by ID Response:', response.data.data);
   // if (!response.data) throw new Error('Failed to fetch course');
   return response.data.data;
 });
@@ -69,6 +67,43 @@ export const duplicateSection = createAsyncThunk<any, { id: string; courseId?: s
 export const reorderSections = createAsyncThunk<any, { courseId: string; orderedSectionIds: string[] }>('courses/reorderSections', async ({ courseId, orderedSectionIds }) => {
   const response = await apiClient.post<ApiResponse<any>>(`/sections/course/${courseId}/reorder`, { orderedSectionIds });
   if (!response.data) throw new Error('Failed to reorder sections');
+  return response.data.data;
+});
+
+export const toggleSectionVisibility = createAsyncThunk<any, { sectionId: string; isHidden: boolean }>('courses/toggleSectionVisibility', async ({ sectionId, isHidden }) => {
+  const response = await apiClient.put<ApiResponse<any>>(`/sections/${sectionId}`, { isHidden });
+  if (!response.data) throw new Error('Failed to toggle section visibility');
+  return response.data.data;
+});
+
+export const updateSectionDescription = createAsyncThunk<any, { sectionId: string; description: string; title?: string }>('courses/updateSectionDescription', async ({ sectionId, description, title }) => {
+  const response = await apiClient.put<ApiResponse<any>>(`/sections/${sectionId}`, { description, ...(title ? { title } : {}) });
+  if (!response.data) throw new Error('Failed to update section description');
+  return response.data.data;
+});
+
+// Activity thunks
+export const updateActivity = createAsyncThunk<any, { activityId: string; data: any }>('courses/updateActivity', async ({ activityId, data }) => {
+  const response = await apiClient.put<ApiResponse<any>>(`/activities/${activityId}`, data);
+  if (!response.data) throw new Error('Failed to update activity');
+  return response.data.data;
+});
+
+export const deleteActivity = createAsyncThunk<any, string>('courses/deleteActivity', async (activityId) => {
+  const response = await apiClient.delete<ApiResponse<any>>(`/activities/${activityId}`);
+  if (!response.data) throw new Error('Failed to delete activity');
+  return { id: activityId };
+});
+
+export const toggleActivityVisibility = createAsyncThunk<any, { activityId: string; isHidden: boolean }>('courses/toggleActivityVisibility', async ({ activityId, isHidden }) => {
+  const response = await apiClient.put<ApiResponse<any>>(`/activities/${activityId}`, { isHidden });
+  if (!response.data) throw new Error('Failed to toggle activity visibility');
+  return response.data.data;
+});
+
+export const reorderActivities = createAsyncThunk<any, { sectionId: string; orderedActivityIds: string[] }>('courses/reorderActivities', async ({ sectionId, orderedActivityIds }) => {
+  const response = await apiClient.post<ApiResponse<any>>(`/activities/section/${sectionId}/reorder`, { orderedActivityIds });
+  if (!response.data) throw new Error('Failed to reorder activities');
   return response.data.data;
 });
 

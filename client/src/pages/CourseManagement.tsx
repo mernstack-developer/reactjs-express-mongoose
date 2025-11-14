@@ -125,7 +125,7 @@ const CourseManagement: React.FC = () => {
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Courses</h1>
         <button
-          onClick={() => navigate('/course/create')}
+          onClick={() => navigate('/admin/courses/create')}
           className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
         >
           Create Course

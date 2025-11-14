@@ -3,10 +3,14 @@ import UserMetaCard from "../components/UserProfile/UserMetaCard";
 import UserInfoCard from "../components/UserProfile/UserInfoCard";
 import UserAddressCard from "../components/UserProfile/UserAddressCard";
 import PageMeta from "../components/common/PageMeta";
+//import  { useEffect } from 'react';
+import { RootState } from "../store";
 
+import {  useAppSelector } from "../hooks";
 
 export default function UserProfiles() {
-
+       const { data:user}
+     = useAppSelector((state: RootState) => state.user);
   return (
     <>
       <PageMeta

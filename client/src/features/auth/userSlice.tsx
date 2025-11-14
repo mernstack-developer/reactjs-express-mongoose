@@ -60,6 +60,23 @@ export const fetchProfile=createAsyncThunk<
   }
 })
 
+// Thunk to update user profile
+export const updateProfile = createAsyncThunk<
+  User, // return updated user
+  any // payload (allow nulls from form)
+>('user/updateProfile', async (payload, { rejectWithValue }) => {
+  try {
+    const response = await apiClient.put('/auth/profile', payload);
+    // backend returns { user: updated }
+    const updated = response.data?.user || response.data;
+    // update localStorage if present
+    if (updated) localStorage.setItem('user', JSON.stringify(updated));
+    return updated as User;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data?.message || 'Update failed');
+  }
+});
+
 // Thunk for handling user logout
 export const logoutUser = createAsyncThunk('user/logout', async () => {
   // Optional: Invalidate server session/cookie
@@ -165,6 +182,20 @@ export const userSlice = createSlice({
         state.error = action.error.message || 'Login failed';
         state.data = null;
         state.error = action.payload as string;
+      })
+      // updateProfile handlers
+      .addCase(updateProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.data = action.payload;
+        state.error = null;
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = (action.payload as string) || action.error.message || 'Update failed';
       })
 
   },

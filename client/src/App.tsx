@@ -66,7 +66,7 @@ export default function App() {
               {/* Student Pages */}
               <Route path="/dashboard" element={<Home />} />
               <Route path="/my-courses" element={<StudentCourses />} />
-              <Route path="/course/:id" element={<StudentCourseDetail />} />
+              <Route path="/courses/view/:id" element={<StudentCourseDetail />} />
                 <Route path="/categories" element={<CategoriesPage />} />
                 <Route path="/categories/:id" element={<CategoryDetail />} />
               <Route path="/profile" element={<UserProfiles />} />

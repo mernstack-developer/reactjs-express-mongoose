@@ -42,7 +42,7 @@ const CreateCourse: React.FC = () => {
       }
       const result = await dispatch(createCourse(formData));
       if ((result.payload as any)?._id) {
-        navigate(`/courses/${(result.payload as any)._id}/editor`);
+        navigate(`/admin/courses/${(result.payload as any)._id}/editor`);
       }
     } catch (err) {
       setError('Failed to create course');
