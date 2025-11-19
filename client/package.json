@@ -20,6 +20,7 @@
     "@react-jvectormap/core": "^1.0.4",
     "@react-jvectormap/world": "^1.1.2",
     "@reduxjs/toolkit": "^2.9.2",
+    "razorpay": "^2.1.0",
     "@tiptap/extension-blockquote": "^3.10.7",
     "@tiptap/extension-bold": "^3.10.7",
     "@tiptap/extension-code": "^3.10.7",

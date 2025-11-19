@@ -30,7 +30,6 @@ async function seed() {
     // await User.deleteMany({});
 
     // Ensure roles exist (skip if roles seeded elsewhere)
-    const Role = require('../models/role.model');
     let studentRole = await Role.findOne({ name: 'student' });
     let instructorRole = await Role.findOne({ name: 'instructor' });
     if (!studentRole || !instructorRole) {

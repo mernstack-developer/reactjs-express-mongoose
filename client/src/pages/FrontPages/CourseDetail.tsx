@@ -45,7 +45,7 @@ const ContentBlockRenderer: React.FC<{ content: ContentBlock }> = ({ content }) 
 const SectionRenderer: React.FC<{ section: CourseSection }> = ({ section }) => {
   return (
     <div className="course-section" style={{ border: '1px solid #ccc', padding: '10px', margin: '10px 0' }}>
-      <h3>{section.sectionTitle}</h3>
+      <h3>{section?.title}</h3>
       {section.contents.map((content) => (
         <ContentBlockRenderer key={content._id} content={content} />
       ))}

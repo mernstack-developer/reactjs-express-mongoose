@@ -12,6 +12,7 @@ const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
 // const {user } = useAuth();
   const {  data:user} = useAppSelector((state: RootState) => state.user);
+  const { data: cart } = useAppSelector((state: RootState) => state.cart);
 
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
 
@@ -189,6 +190,14 @@ const AppHeader: React.FC = () => {
             <NotificationDropdown />
            
             {/* <!-- Notification Menu Area --> */}
+            <Link to="/cart" className="relative p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+              <span className="text-2xl">🛒</span>
+              {cart && cart.items && cart.items.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {cart.items.length}
+                </span>
+              )}
+            </Link>
           </div>
           {/* <!-- User Area --> */}
           {user && (

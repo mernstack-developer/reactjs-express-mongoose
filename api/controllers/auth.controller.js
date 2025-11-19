@@ -14,6 +14,7 @@ async function register(req, res) {
 async function login(req, res) {
   try {
     const { user, token } = await authService.loginUser(req.body);
+    console.log('Login successful for user:', user);
     res.json({ user, token });
   } catch (err) {
     console.error(err);

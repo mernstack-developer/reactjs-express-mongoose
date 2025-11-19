@@ -19,7 +19,7 @@ console.log("isAuthenticated",isAuthenticated)
   }
   const handleLogout = () => {
    dispatch(logoutUser());
-    navigate('/signin', { replace: true }); // Redirect to login page
+    navigate('/', { replace: true }); // Redirect to login page
   };
   function closeDropdown() {
     setIsOpen(false);

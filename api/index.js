@@ -8,6 +8,8 @@ const express = require('express');
   const sectionRoutes = require('./routes/section.routes');
   const permissionRoleRoutes = require('./routes/permission.routes');
   const uploadRoutes = require('./routes/upload.routes');
+  const cartRoutes = require('./routes/cart.routes');
+  const paymentRoutes = require('./routes/payment.routes');
   const authMiddleware = require('./middleware/auth.middleware');
   const activityRoutes = require('./routes/activity.routes');
   const assignmentRoutes = require('./routes/assignment.routes');
@@ -43,6 +45,8 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/assignments', assignmentRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/payments', paymentRoutes);
  app.use('/api', authMiddleware, permissionRoleRoutes);
 // A simple API route
 app.get('/api/greeting', (req, res) => {

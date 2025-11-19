@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAppSelector, useAppDispatch } from '../hooks';
 import { useNavigate } from 'react-router-dom';
 import { fetchPublicCourses, enrollInCourse } from '../features/courses/coursesSlice';
+import { addToCart, fetchCart } from '../features/cart/cartSlice';
 import PageBreadCrumb from '../components/common/PageBreadCrumb';
 import type { Course } from '../types/types';
 
@@ -108,11 +109,26 @@ export default function PublicCourses() {
     }
   };
 
-  const handleBuyCourse = (course: Course) => {
-    // TODO: Integrate payment processor (Stripe/PayPal)
-    alert(
-      `Course price: $${course.price} ${course.currency || 'USD'}\n\nPayment integration coming soon!`
-    );
+  const handleBuyCourse = async (course: Course) => {
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: '/public-courses' } });
+      return;
+    }
+
+    try {
+      // Add course to cart
+      await dispatch(addToCart(course._id)).unwrap();
+      
+      // Refresh cart data
+      await dispatch(fetchCart()).unwrap();
+      
+      // Show success message and redirect to cart
+      alert(`Course "${course.title}" added to cart successfully!`);
+      navigate('/cart');
+    } catch (error: any) {
+      console.error('Error adding course to cart:', error);
+      alert(error.message || 'Failed to add course to cart. Please try again.');
+    }
   };
 
   const isEnrolled = (course: Course) => {
@@ -301,7 +317,13 @@ export default function PublicCourses() {
 
                     {/* Button */}
                     <button
-                      onClick={() => handleEnrollClick(course)}
+                      onClick={() => {
+                        if (course.enrollmentType === 'paid') {
+                          handleBuyCourse(course);
+                        } else {
+                          handleEnrollClick(course);
+                        }
+                      }}
                       disabled={
                         isEnrolled(course) ||
                         enrollingCourseId === course._id
@@ -313,10 +335,10 @@ export default function PublicCourses() {
                       ) : enrollingCourseId === course._id ? (
                         <span className="flex items-center justify-center gap-2">
                           <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                          Enrolling...
+                          Processing...
                         </span>
                       ) : course.enrollmentType === 'paid' ? (
-                        'Buy Now'
+                        'Add to Cart'
                       ) : (
                         'Enroll Free'
                       )}

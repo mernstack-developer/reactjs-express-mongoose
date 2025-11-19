@@ -16,7 +16,8 @@ export default function StudentCourses() {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    dispatch(fetchRegisteredCourses({ userId: user?._id }));
+    if(!user?._id) return;
+    dispatch(fetchRegisteredCourses({ userId: user._id }));
   }, [dispatch, user?._id]);
 
   const handleViewCourse = (courseId: string) => {

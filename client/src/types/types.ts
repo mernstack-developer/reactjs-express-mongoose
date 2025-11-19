@@ -45,6 +45,49 @@ export interface User {
   createdAt: string;
   updatedAt: string;
 }
+export interface CartItem {
+  _id: string;
+  course: Course;
+  price: number;
+  addedAt: string;
+}
+
+export interface Cart {
+  _id: string;
+  userId: string;
+  items: CartItem[];
+  createdAt: string;
+  updatedAt: string;
+  subtotal: number;
+  tax: number;
+  total: number;
+}
+
+export interface Order {
+  _id: string;
+  userId: string;
+  cart: Cart;
+  paymentIntentId: string;
+  paymentStatus: 'pending' | 'paid' | 'failed' | 'cancelled';
+  orderStatus: 'processing' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
+  totalAmount: number;
+  currency: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PaymentIntent {
+  id: string;
+  amount: number;
+  currency: string;
+  status: string;
+  metadata: {
+    userId: string;
+    cartId: string;
+    courseIds: string[];
+  };
+}
+
 export interface ContentBlock {
   _id: string;
   type: 'video' | 'text' | 'quiz' | 'assignment' | 'forum' | 'quiz' | 'lesson' | 'h5p' | 'resource' | 'scorm' | 'wiki' | 'workshop' | 'choice' | 'database' | 'feedback' | 'bigbluebutton' | 'lti';

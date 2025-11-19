@@ -31,7 +31,7 @@ async function loginUser({ email, password }) {
   const ok = await bcrypt.compare(password, user.password);
   if (!ok) throw new Error('Invalid credentials');
 
-  const payload = { id: user._id, email: user.email, role: user.role ,permissions: user.role.permissions.map((p) => p.name)};
+  const payload = { id: user._id, email: user.email, role: user.role ,permissions: user.role?.permissions?.map((p) => p.name)};
   const token = jwt.sign(payload, process.env.JWT_SECRET || 'secret', { expiresIn: '7d' });
   return { user, token };
 }

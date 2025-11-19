@@ -12,12 +12,13 @@ import Buttons from "./pages/UiElements/Buttons";
 import LineChart from "./pages/Charts/LineChart";
 import BarChart from "./pages/Charts/BarChart";
 import Calendar from "./pages/Calendar";
-import BasicTables from "./pages/Tables/BasicTables";
 import FormElements from "./pages/Forms/FormElements";
 import Blank from "./pages/Blank";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
+import CartPage from "./pages/CartPage";
+import CheckoutPage from "./pages/CheckoutPage";
 import GuestList from './components/GuestList';
 import AddGuestForm from './components/AddGuestForm';
 import AddUserForm from './components/AddUserForm';
@@ -72,6 +73,10 @@ export default function App() {
               <Route path="/profile" element={<UserProfiles />} />
               <Route path="/assignments/:id" element={<AssignmentPage />} />
               <Route path="/calendar" element={<Calendar />} />
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/checkout/success" element={<div>Payment Successful!</div>} />
+              <Route path="/checkout/cancel" element={<div>Payment Cancelled!</div>} />
               <Route path="/blank" element={<Blank />} />
 
               {/* Admin Pages (Protected with /admin prefix) */}
@@ -94,7 +99,6 @@ export default function App() {
 
             {/* UI Component Pages (visible for testing) */}
             <Route path="/form-elements" element={<FormElements />} />
-            <Route path="/basic-tables" element={<BasicTables />} />
             <Route path="/alerts" element={<Alerts />} />
             <Route path="/avatars" element={<Avatars />} />
             <Route path="/badge" element={<Badges />} />

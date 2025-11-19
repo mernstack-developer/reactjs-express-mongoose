@@ -78,8 +78,7 @@ export default function UserMetaCard() {
           city: user.address?.city || '',
           state: user.address?.state || '',
           postalCode: user.address?.postalCode || '',
-          country: user.address?.country || '',
-          taxId: user.address?.taxId || '',
+          country: user.address?.country || ''
         }
       });
     }
