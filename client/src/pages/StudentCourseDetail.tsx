@@ -407,9 +407,7 @@ console.log('course.registeredUsers',course?.registeredUsers +''+'user._id='+use
                     <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                       {course.title}
                     </h2>
-                    <p className="text-gray-700 dark:text-gray-300 mb-4">
-                      {course.description}
-                    </p>
+                    
                     <div className="grid grid-cols-3 gap-4 text-sm">
                       <div>
                         <p className="text-gray-500 dark:text-gray-400">Duration</p>

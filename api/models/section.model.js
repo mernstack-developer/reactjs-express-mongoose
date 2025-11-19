@@ -5,6 +5,7 @@ const SectionSchema = new mongoose.Schema({
     description: { type: String, required: false, default: '' },
     isHidden: { type: Boolean, default: false },
     order: { type: Number, default: 0 },
+    parentSection: { type: String, required: false }, // ID of parent section for hierarchical structure
     media: {
         type: { type: String, enum: ['video', 'image'], required: false },
         url: { type: String, required: false },
