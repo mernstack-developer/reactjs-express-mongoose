@@ -5,6 +5,12 @@ const SectionSchema = new mongoose.Schema({
     description: { type: String, required: false, default: '' },
     isHidden: { type: Boolean, default: false },
     order: { type: Number, default: 0 },
+    media: {
+        type: { type: String, enum: ['video', 'image'], required: false },
+        url: { type: String, required: false },
+        thumbnail: { type: String, required: false },
+        alt: { type: String, required: false }
+    },
    contents:[{
     type: { type: String, enum: ['video', 'text', 'quiz'], required: false },
   title: { type: String, required: false },

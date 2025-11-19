@@ -65,10 +65,19 @@ const ActivityRenderer: React.FC<{
   activity: Activity;
   title: string;
   enrollmentStatus: boolean;
-}> = ({ activity, title, enrollmentStatus }) => {
+  onActivitySelect?: (activityId: string) => void;
+  selectedActivityId?: string | null;
+}> = ({ activity, title, enrollmentStatus, onActivitySelect, selectedActivityId }) => {
   const navigate = useNavigate();
 
   const handleActivityClick = (activityType: string) => {
+    // If onActivitySelect is provided, use it instead of navigating
+    if (onActivitySelect) {
+      onActivitySelect(activity._id);
+      return;
+    }
+
+    // Otherwise, navigate to the activity page (original behavior)
     if (activityType === 'assignment' && activity.config?.assignmentId) {
       navigate(`/assignments/${activity.config.assignmentId}`);
     }
@@ -93,8 +102,9 @@ const ActivityRenderer: React.FC<{
   return (
     <div
       id={`activity-${activity._id}`}
-      className="activity-block mb-8 p-6 bg-white dark:bg-gray-800 rounded-lg
-                border border-gray-200 dark:border-gray-700"
+      className={`activity-block mb-8 p-6 bg-white dark:bg-gray-800 rounded-lg
+                border border-gray-200 dark:border-gray-700 cursor-pointer
+                ${selectedActivityId === activity._id ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'hover:shadow-md transition-shadow'}`}
       onClick={() => handleActivityClick(activity.type)}
     >
       <div className="flex items-start justify-between mb-3">
@@ -132,7 +142,9 @@ const SectionRenderer: React.FC<{
   section: CourseSection;
   enrollmentStatus: boolean;
   isActive: boolean;
-}> = ({ section, enrollmentStatus, isActive }) => {
+  selectedActivityId?: string | null;
+  onActivitySelect?: (activityId: string) => void;
+}> = ({ section, enrollmentStatus, isActive, selectedActivityId, onActivitySelect }) => {
   console.log('Rendering section:', section);
   
   return (
@@ -199,6 +211,8 @@ const SectionRenderer: React.FC<{
                   activity={activity}
                   title={section.title}
                   enrollmentStatus={enrollmentStatus}
+                  onActivitySelect={onActivitySelect}
+                  selectedActivityId={selectedActivityId}
                 />
               ))}
             </div>
@@ -223,7 +237,18 @@ export default function StudentCourseDetail() {
   const { selectedCourse: course, loading, error } = useAppSelector((state) => state.courses);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
+  const [selectedActivityId, setSelectedActivityId] = useState<string | null>(null);
+  const [showCourseOverview, setShowCourseOverview] = useState(true); // Show overview by default initially
   const { data: user } = useAppSelector((state) => state.user);
+
+  // Don't automatically show first section - wait for user to select
+  // Only show course overview by default when no section or activity is selected
+  useEffect(() => {
+    if (course?.sections && course.sections.length > 0 && !activeSectionId && !selectedActivityId) {
+      // Course overview will be shown by default (activeSectionId and selectedActivityId are both null)
+      // User must explicitly click "📖 Course Overview" or a section to see content
+    }
+  }, [course?.sections, activeSectionId, selectedActivityId]);
 
   useEffect(() => {
     if (id) {
@@ -305,7 +330,11 @@ console.log('course.registeredUsers',course?.registeredUsers +''+'user._id='+use
         <CourseSidebar 
           course={course} 
           onSectionSelect={setActiveSectionId}
+          onCourseOverviewToggle={() => setShowCourseOverview(!showCourseOverview)}
+          onCourseOverviewHide={() => setShowCourseOverview(false)}
           activeSectionId={activeSectionId || undefined}
+          selectedActivityId={selectedActivityId}
+          showCourseOverview={showCourseOverview}
         />
       </div>
 
@@ -336,10 +365,26 @@ console.log('course.registeredUsers',course?.registeredUsers +''+'user._id='+use
           </h1>
           {activeSectionId && (
             <button
-              onClick={() => setActiveSectionId(null)}
+              onClick={() => {
+                setActiveSectionId(null);
+                setShowCourseOverview(true);
+              }}
               className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors"
             >
-              Show All Sections
+              📖 Course Overview
+            </button>
+          )}
+
+          {selectedActivityId && (
+            <button
+              onClick={() => {
+                setSelectedActivityId(null);
+                setActiveSectionId(null);
+                setShowCourseOverview(true);
+              }}
+              className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm transition-colors"
+            >
+              ← Back to Course
             </button>
           )}
         </div>
@@ -347,55 +392,102 @@ console.log('course.registeredUsers',course?.registeredUsers +''+'user._id='+use
         {/* Scrollable Content Area */}
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-4xl mx-auto p-6 md:p-8">
-            {/* Course Header Card */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-8">
-              <div className="flex gap-6">
-                {course.imageUrl && (
-                  <img
-                    src={course.imageUrl}
-                    alt={course.title}
-                    className="w-32 h-32 object-cover rounded-lg flex-shrink-0"
-                  />
-                )}
-                <div className="flex-1">
-                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                    {course.title}
-                  </h2>
-                  <p className="text-gray-700 dark:text-gray-300 mb-4">
-                    {course.description}
-                  </p>
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <p className="text-gray-500 dark:text-gray-400">Duration</p>
-                      <p className="font-semibold text-gray-900 dark:text-white">
-                        {course.duration} hours
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500 dark:text-gray-400">Sections</p>
-                      <p className="font-semibold text-gray-900 dark:text-white">
-                        {course.sections?.length || 0}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500 dark:text-gray-400">Enrolled</p>
-                      <p className="font-semibold text-gray-900 dark:text-white">
-                        {course.registeredUsers?.length || 0}
-                      </p>
+            {/* Course Header Card - Only show when course overview is active */}
+            {showCourseOverview && (
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-8">
+                <div className="flex gap-6">
+                  {course.imageUrl && (
+                    <img
+                      src={course.imageUrl}
+                      alt={course.title}
+                      className="w-32 h-32 object-cover rounded-lg flex-shrink-0"
+                    />
+                  )}
+                  <div className="flex-1">
+                    <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                      {course.title}
+                    </h2>
+                    <p className="text-gray-700 dark:text-gray-300 mb-4">
+                      {course.description}
+                    </p>
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <p className="text-gray-500 dark:text-gray-400">Duration</p>
+                        <p className="font-semibold text-gray-900 dark:text-white">
+                          {course.duration} hours
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500 dark:text-gray-400">Sections</p>
+                        <p className="font-semibold text-gray-900 dark:text-white">
+                          {course.sections?.length || 0}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500 dark:text-gray-400">Enrolled</p>
+                        <p className="font-semibold text-gray-900 dark:text-white">
+                          {course.registeredUsers?.length || 0}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
+
+            {/* Course Overview (shown only when explicitly requested) */}
+            {showCourseOverview && course.sections && course.sections.length > 0 && (
+              <div className="course-overview mb-8">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                    Course Overview
+                  </h2>
+                  <div className="prose max-w-none text-gray-700 dark:text-gray-300">
+                    <RichTextRenderer content={course.description} />
+                  </div>
+                </div>
+
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    Course Sections
+                  </h3>
+                  <div className="grid gap-4">
+                    {course.sections.map((section, index) => (
+                      <div
+                        key={section._id}
+                        className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+                        onClick={() => setActiveSectionId(section._id)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <h4 className="text-md font-semibold text-gray-900 dark:text-white">
+                              {index + 1}. {section.title}
+                            </h4>
+                            {section.description && (
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+                                {section.description.replace(/<[^>]*>/g, '').substring(0, 100)}...
+                              </p>
+                            )}
+                          </div>
+                          <span className="text-gray-400">→</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Sections and Content */}
-            {course.sections && course.sections.length > 0 ? (
+            {course.sections && course.sections.length > 0 && !showCourseOverview ? (
               course.sections.map((section) => (
                 <SectionRenderer
                   key={section._id}
                   section={section}
                   enrollmentStatus={isEnrolled || false}
-                  isActive={activeSectionId ? activeSectionId === section._id : true}
+                  isActive={activeSectionId ? activeSectionId === section._id : false}
+                  selectedActivityId={selectedActivityId}
+                  onActivitySelect={setSelectedActivityId}
                 />
               ))
             ) : (

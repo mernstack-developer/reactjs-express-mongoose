@@ -4,11 +4,15 @@ import { Course, CourseSection } from '../types/types';
 interface CourseSidebarProps {
   course: Course;
   activeActivityId?: string;
-  onSectionSelect?: (sectionId: string) => void;
+  onSectionSelect?: (sectionId: string | null) => void;
+  onCourseOverviewToggle?: () => void;
+  onCourseOverviewHide?: () => void;
   activeSectionId?: string | null;
+  selectedActivityId?: string | null;
+  showCourseOverview?: boolean;
 }
 
-export default function CourseSidebar({ course, activeActivityId, onSectionSelect, activeSectionId }: CourseSidebarProps) {
+export default function CourseSidebar({ course, activeActivityId, onSectionSelect, onCourseOverviewToggle, onCourseOverviewHide, activeSectionId, selectedActivityId, showCourseOverview }: CourseSidebarProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(course.sections?.map(s => s._id) || [])
   );
@@ -55,6 +59,44 @@ export default function CourseSidebar({ course, activeActivityId, onSectionSelec
         </p>
       </div>
 
+      {/* Course Overview Option */}
+      <div className="px-4 py-2 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+        <button
+          onClick={() => {
+            if (onCourseOverviewToggle) {
+              onCourseOverviewToggle();
+            }
+            if (onSectionSelect) {
+              onSectionSelect(null);
+            }
+          }}
+          className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
+            showCourseOverview && !activeSectionId && !selectedActivityId
+              ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-medium'
+              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+          }`}
+        >
+          📖 Course Overview
+        </button>
+      </div>
+
+      {/* Activity Selected Indicator */}
+      {selectedActivityId && (
+        <div className="px-4 py-3 bg-yellow-50 dark:bg-yellow-900/20 border-b border-gray-200 dark:border-gray-700">
+          <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Activity Selected</div>
+          <button
+            onClick={() => {
+              if (onSectionSelect) {
+                onSectionSelect(null);
+              }
+            }}
+            className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium"
+          >
+            ← Back to Course
+          </button>
+        </div>
+      )}
+
       {/* Sections List */}
       <nav className="flex-1 overflow-y-auto">
         {course.sections && course.sections.length > 0 ? (
@@ -67,6 +109,9 @@ export default function CourseSidebar({ course, activeActivityId, onSectionSelec
                     toggleSection(section._id);
                     if (onSectionSelect) {
                       onSectionSelect(section._id);
+                    }
+                    if (onCourseOverviewHide) {
+                      onCourseOverviewHide();
                     }
                   }}
                   className={`w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50
