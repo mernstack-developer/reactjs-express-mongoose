@@ -4,9 +4,11 @@ import { Course, CourseSection } from '../types/types';
 interface CourseSidebarProps {
   course: Course;
   activeActivityId?: string;
+  onSectionSelect?: (sectionId: string) => void;
+  activeSectionId?: string | null;
 }
 
-export default function CourseSidebar({ course, activeActivityId }: CourseSidebarProps) {
+export default function CourseSidebar({ course, activeActivityId, onSectionSelect, activeSectionId }: CourseSidebarProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(course.sections?.map(s => s._id) || [])
   );
@@ -61,9 +63,15 @@ export default function CourseSidebar({ course, activeActivityId }: CourseSideba
               <li key={section._id} className="border-b border-gray-100 dark:border-gray-700">
                 {/* Section Header */}
                 <button
-                  onClick={() => toggleSection(section._id)}
-                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50
-                           dark:hover:bg-gray-700 transition-colors text-left group"
+                  onClick={() => {
+                    toggleSection(section._id);
+                    if (onSectionSelect) {
+                      onSectionSelect(section._id);
+                    }
+                  }}
+                  className={`w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50
+                           dark:hover:bg-gray-700 transition-colors text-left group cursor-pointer
+                           ${activeSectionId === section._id ? 'bg-blue-50 dark:bg-blue-900/30' : ''}`}
                 >
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     <svg

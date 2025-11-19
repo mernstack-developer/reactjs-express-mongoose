@@ -131,29 +131,46 @@ const ActivityRenderer: React.FC<{
 const SectionRenderer: React.FC<{
   section: CourseSection;
   enrollmentStatus: boolean;
-}> = ({ section, enrollmentStatus }) => {
-  const [isExpanded, setIsExpanded] = useState(true);
+  isActive: boolean;
+}> = ({ section, enrollmentStatus, isActive }) => {
   console.log('Rendering section:', section);
+  
   return (
-    <div className="section-block mb-8">
-    
-      <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200 dark:border-gray-700">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-          {section?.title || 'Untitled Section'}
-        </h2>
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-        >
-          {isExpanded ? '▼' : '▶'}
-        </button>
-      </div>
-
-      {isExpanded && (
+    <div className={`section-block mb-8 ${!isActive ? 'hidden' : 'block'}`}>
+      {isActive && (
         <>
+          {/* Section Media */}
+          {section.media && (
+            <div className="mb-6">
+              {section.media.type === 'video' ? (
+                <div className="video-container rounded-lg overflow-hidden shadow-lg">
+                  <video
+                    controls
+                    src={section.media.url}
+                    className="w-full"
+                    style={{ maxHeight: '500px' }}
+                    poster={section.media.thumbnail}
+                  />
+                </div>
+              ) : (
+                <div className="image-container rounded-lg overflow-hidden shadow-lg">
+                  <img
+                    src={section.media.url}
+                    alt={section.media.alt || section.title}
+                    className="w-full"
+                    style={{ maxHeight: '500px', objectFit: 'cover' }}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Section Description */}
           {section.description && (
             <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                About this Section
+              </h3>
               <RichTextRenderer content={section.description} />
             </div>
           )}
@@ -161,6 +178,9 @@ const SectionRenderer: React.FC<{
           {/* Content Blocks */}
           {section.contents && section.contents.length > 0 && (
             <div className="mb-8">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Section Content
+              </h3>
               {section.contents.map((content) => (
                 <ContentBlockRenderer key={content._id} content={content} />
               ))}
@@ -170,6 +190,9 @@ const SectionRenderer: React.FC<{
           {/* Activities */}
           {section.activities && section.activities.length > 0 && (
             <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Activities
+              </h3>
               {section.activities.map((activity: Activity) => (
                 <ActivityRenderer
                   key={activity._id}
@@ -199,6 +222,7 @@ export default function StudentCourseDetail() {
 
   const { selectedCourse: course, loading, error } = useAppSelector((state) => state.courses);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
   const { data: user } = useAppSelector((state) => state.user);
 
   useEffect(() => {
@@ -278,7 +302,11 @@ console.log('course.registeredUsers',course?.registeredUsers +''+'user._id='+use
           sidebarOpen ? 'block' : 'hidden'
         } md:block md:w-64 lg:w-80 flex-shrink-0 overflow-y-auto`}
       >
-        <CourseSidebar course={course} />
+        <CourseSidebar 
+          course={course} 
+          onSectionSelect={setActiveSectionId}
+          activeSectionId={activeSectionId || undefined}
+        />
       </div>
 
       {/* Main Content */}
@@ -306,6 +334,14 @@ console.log('course.registeredUsers',course?.registeredUsers +''+'user._id='+use
           <h1 className="text-xl font-bold text-gray-900 dark:text-white flex-1">
             {course.title}
           </h1>
+          {activeSectionId && (
+            <button
+              onClick={() => setActiveSectionId(null)}
+              className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors"
+            >
+              Show All Sections
+            </button>
+          )}
         </div>
 
         {/* Scrollable Content Area */}
@@ -359,6 +395,7 @@ console.log('course.registeredUsers',course?.registeredUsers +''+'user._id='+use
                   key={section._id}
                   section={section}
                   enrollmentStatus={isEnrolled || false}
+                  isActive={activeSectionId ? activeSectionId === section._id : true}
                 />
               ))
             ) : (

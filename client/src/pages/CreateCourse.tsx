@@ -1,15 +1,20 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAppDispatch } from '../hooks';
-import { createCourse } from '../features/courses/coursesSlice';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '../hooks';
+import { createCourse, updateCourse, fetchCourseById } from '../features/courses/coursesSlice';
 import PageBreadCrumb from '../components/common/PageBreadCrumb';
 import RichTextEditor from '../components/RichTextEditor/RichTextEditor';
 import '../components/RichTextEditor/RichTextEditor.css';
+import { uploadFileToServer } from '../utils/upload';
 
 const CreateCourse: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { courseId } = useParams();
+  const { selectedCourse } = useAppSelector((state) => state.courses);
   
+  const isEdit = Boolean(courseId);
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -24,15 +29,48 @@ const CreateCourse: React.FC = () => {
     startDate: '',
     endDate: '',
     tags: [] as string[],
-    category: '',
+    category: undefined as string | undefined,
     thumbnail: '',
   });
-  const [descriptionFocused, setDescriptionFocused] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [imageUploading, setImageUploading] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  // Load course data when editing
+  useEffect(() => {
+    if (isEdit && courseId) {
+      const loadCourse = async () => {
+        try {
+          const result = await dispatch(fetchCourseById(courseId));
+          if (result.payload) {
+            const course = result.payload as any;
+            setFormData({
+              title: course.title || '',
+              description: course.description || '',
+              instructor: course.instructor || '',
+              duration: course.duration || 0,
+              enrollmentType: course.enrollmentType || 'free',
+              price: course.price || 0,
+              currency: course.currency || 'INR',
+              isPublic: course.isPublic || false,
+              maxStudents: course.maxStudents,
+              enrollmentDeadline: course.enrollmentDeadline || '',
+              startDate: course.startDate || '',
+              endDate: course.endDate || '',
+              tags: course.tags || [],
+              category: course.category || undefined,
+              thumbnail: course.thumbnail || '',
+            });
+          }
+        } catch (error) {
+          console.error('Failed to load course:', error);
+          setError('Failed to load course data');
+        }
+      };
+      loadCourse();
+    }
+  }, [isEdit, courseId, dispatch]);  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     
     let processedValue: any = value;
@@ -71,21 +109,65 @@ const CreateCourse: React.FC = () => {
       setError('Course title is required');
       return;
     }
+    
     setLoading(true);
+    setError('');
+    
     try {
-      // If an image is provided, upload it first
+      // Prepare course data
+      const courseData: any = { ...formData };
+      
+      // Handle category - only include if it has a value
+      if (formData.category) {
+        courseData.category = formData.category;
+      } else {
+        delete courseData.category;
+      }
+      
+      // Handle image upload
       if (imageFile) {
-        const upload = await import('../utils/upload');
-        const resp = await upload.uploadFileToServer(imageFile);
-        const url = resp?.data?.url || resp?.data?.downloadUrl || resp?.data?.publicUrl || resp?.url || resp.data;
-        (formData as any).imageUrl = url;
+        try {
+          const upload = await import('../utils/upload');
+          const resp = await upload.uploadFileToServer(imageFile);
+          const url = resp?.data?.url || resp?.data?.downloadUrl || resp?.data?.publicUrl || resp?.url || resp.data;
+          if (url) {
+            courseData.imageUrl = url;
+          }
+        } catch (uploadError) {
+          console.error('Image upload failed:', uploadError);
+          // Don't fail the entire course creation if image upload fails
+        }
       }
-      const result = await dispatch(createCourse(formData));
-      if ((result.payload as any)?._id) {
-        navigate(`/admin/courses/${(result.payload as any)._id}/editor`);
+      
+      // Validate price for paid courses
+      if (formData.enrollmentType === 'paid' && (!formData.price || formData.price <= 0)) {
+        setError('Price is required for paid courses and must be greater than 0');
+        return;
       }
-    } catch (err) {
-      setError('Failed to create course');
+      
+      let result;
+      if (isEdit && courseId) {
+        // Update existing course
+        result = await dispatch(updateCourse({ id: courseId, data: courseData }));
+        if (result.payload) {
+          navigate(`/admin/courses/${courseId}/editor`);
+        }
+      } else {
+        // Create new course
+        result = await dispatch(createCourse(courseData));
+        if ((result.payload as any)?._id) {
+          navigate(`/admin/courses/${(result.payload as any)._id}/editor`);
+        }
+      }
+    } catch (err: any) {
+      console.error(isEdit ? 'Course update error:' : 'Course creation error:', err);
+      if (err.message?.includes('category')) {
+        setError('Please select a valid category or leave it empty');
+      } else if (err.message?.includes('validation failed')) {
+        setError('Please check your input and try again');
+      } else {
+        setError(err.message || (isEdit ? 'Failed to update course' : 'Failed to create course'));
+      }
     } finally {
       setLoading(false);
     }
@@ -93,7 +175,7 @@ const CreateCourse: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <PageBreadCrumb pageTitle="Create Course" />
+      <PageBreadCrumb pageTitle={isEdit ? "Edit Course" : "Create Course"} />
       
       <div className="flex h-screen">
         {/* Main Content Area */}
@@ -102,8 +184,15 @@ const CreateCourse: React.FC = () => {
           <div className="bg-white border-b border-gray-200 px-6 py-4">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Create New Course</h1>
-                <p className="text-gray-600 mt-1">Build your course with rich content and engaging descriptions</p>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  {isEdit ? 'Edit Course' : 'Create New Course'}
+                </h1>
+                <p className="text-gray-600 mt-1">
+                  {isEdit 
+                    ? 'Update your course information and content'
+                    : 'Build your course with rich content and engaging descriptions'
+                  }
+                </p>
               </div>
               <div className="flex gap-3">
                 <button
@@ -119,7 +208,11 @@ const CreateCourse: React.FC = () => {
                   onClick={handleSubmit}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {loading ? 'Creating...' : 'Create & Edit'}
+                  {loading ? (
+                    isEdit ? 'Updating...' : 'Creating...'
+                  ) : (
+                    isEdit ? 'Update Course' : 'Create & Edit'
+                  )}
                 </button>
               </div>
             </div>
@@ -260,6 +353,28 @@ const CreateCourse: React.FC = () => {
                       className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       placeholder="Enter instructor name"
                     />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Category (Optional)
+                    </label>
+                    <select
+                      name="category"
+                      value={formData.category || ''}
+                      onChange={handleChange}
+                      className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    >
+                      <option value="">Select a category (optional)</option>
+                      <option value="programming">Programming</option>
+                      <option value="web-development">Web Development</option>
+                      <option value="data-science">Data Science</option>
+                      <option value="mobile-development">Mobile Development</option>
+                      <option value="cloud-computing">Cloud Computing</option>
+                      <option value="devops">DevOps</option>
+                      <option value="design">Design</option>
+                      <option value="business">Business</option>
+                    </select>
                   </div>
 
                   <div>

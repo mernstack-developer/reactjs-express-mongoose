@@ -23,6 +23,10 @@ const SectionEditor: React.FC<SectionEditorProps> = ({ section, courseId, sectio
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [descriptionText, setDescriptionText] = useState(section.description || '');
   const [sectionTitle, setSectionTitle] = useState(section.title || section.sectionTitle || '');
+  const [mediaType, setMediaType] = useState<'video' | 'image' | undefined>(section.media?.type);
+  const [mediaUrl, setMediaUrl] = useState(section.media?.url || '');
+  const [mediaThumbnail, setMediaThumbnail] = useState(section.media?.thumbnail || '');
+  const [mediaAlt, setMediaAlt] = useState(section.media?.alt || '');
 
   const handleToggleVisibility = async () => {
     try {
@@ -35,11 +39,19 @@ const SectionEditor: React.FC<SectionEditorProps> = ({ section, courseId, sectio
 
   const handleSaveDescription = async () => {
     try {
+      const mediaData = mediaType ? {
+        type: mediaType,
+        url: mediaUrl,
+        thumbnail: mediaThumbnail || undefined,
+        alt: mediaAlt || undefined,
+      } : undefined;
+
       await dispatch(
         updateSectionDescription({
           sectionId: section._id,
           description: descriptionText,
           title: sectionTitle,
+          media: mediaData,
         })
       );
       setIsEditingDescription(false);
@@ -156,6 +168,99 @@ const SectionEditor: React.FC<SectionEditorProps> = ({ section, courseId, sectio
               variant="full"
             />
           </div>
+
+          {/* Media Section */}
+          <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-750 rounded-lg border border-gray-300 dark:border-gray-600">
+            <h4 className="text-md font-semibold text-gray-900 dark:text-white mb-3">Section Media</h4>
+            
+            {/* Media Type Selection */}
+            <div className="mb-3">
+              <label className="block text-sm font-medium text-gray-900 dark:text-white mb-1">
+                Media Type
+              </label>
+              <select
+                value={mediaType || ''}
+                onChange={(e) => setMediaType(e.target.value ? (e.target.value as 'video' | 'image') : undefined)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              >
+                <option value="">No media</option>
+                <option value="video">Video</option>
+                <option value="image">Image</option>
+              </select>
+            </div>
+
+            {/* Media URL */}
+            {mediaType && (
+              <>
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-gray-900 dark:text-white mb-1">
+                    Media URL
+                  </label>
+                  <input
+                    type="url"
+                    value={mediaUrl}
+                    onChange={(e) => setMediaUrl(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                    placeholder="Enter video or image URL"
+                  />
+                </div>
+
+                {/* Thumbnail (for videos) */}
+                {mediaType === 'video' && (
+                  <div className="mb-3">
+                    <label className="block text-sm font-medium text-gray-900 dark:text-white mb-1">
+                      Video Thumbnail URL (optional)
+                    </label>
+                    <input
+                      type="url"
+                      value={mediaThumbnail}
+                      onChange={(e) => setMediaThumbnail(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                      placeholder="Enter video thumbnail URL"
+                    />
+                  </div>
+                )}
+
+                {/* Alt Text (for images) */}
+                {mediaType === 'image' && (
+                  <div className="mb-3">
+                    <label className="block text-sm font-medium text-gray-900 dark:text-white mb-1">
+                      Image Alt Text
+                    </label>
+                    <input
+                      type="text"
+                      value={mediaAlt}
+                      onChange={(e) => setMediaAlt(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                      placeholder="Describe the image for accessibility"
+                    />
+                  </div>
+                )}
+
+                {/* Preview */}
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                    Preview
+                  </label>
+                  {mediaType === 'video' && mediaUrl && (
+                    <video
+                      src={mediaUrl}
+                      className="w-full max-h-48 object-cover rounded"
+                      controls
+                      poster={mediaThumbnail}
+                    />
+                  )}
+                  {mediaType === 'image' && mediaUrl && (
+                    <img
+                      src={mediaUrl}
+                      alt={mediaAlt || 'Section media'}
+                      className="w-full max-h-48 object-cover rounded"
+                    />
+                  )}
+                </div>
+              </>
+            )}
+          </div>
           <div className="flex gap-2">
             <button
               onClick={handleSaveDescription}
@@ -168,6 +273,10 @@ const SectionEditor: React.FC<SectionEditorProps> = ({ section, courseId, sectio
                 setIsEditingDescription(false);
                 setDescriptionText(section.description || '');
                 setSectionTitle(section.title || section.sectionTitle || '');
+                setMediaType(section.media?.type);
+                setMediaUrl(section.media?.url || '');
+                setMediaThumbnail(section.media?.thumbnail || '');
+                setMediaAlt(section.media?.alt || '');
               }}
               className="px-4 py-2 bg-gray-400 hover:bg-gray-500 text-white rounded-lg font-medium transition-colors"
             >
@@ -180,6 +289,27 @@ const SectionEditor: React.FC<SectionEditorProps> = ({ section, courseId, sectio
       {/* Section Content */}
       {isExpanded && (
         <div className="px-4 py-4">
+          {/* Section Media Preview */}
+          {section.media && !isEditingDescription && (
+            <div className="mb-4">
+              <h4 className="text-md font-semibold text-gray-900 dark:text-white mb-2">Section Media</h4>
+              {section.media.type === 'video' ? (
+                <video
+                  src={section.media.url}
+                  className="w-full max-h-48 object-cover rounded-lg shadow"
+                  controls
+                  poster={section.media.thumbnail}
+                />
+              ) : (
+                <img
+                  src={section.media.url}
+                  alt={section.media.alt || 'Section media'}
+                  className="w-full max-h-48 object-cover rounded-lg shadow"
+                />
+              )}
+            </div>
+          )}
+
           {section.description && !isEditingDescription && (
             <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
               <RichTextRenderer content={section.description} />

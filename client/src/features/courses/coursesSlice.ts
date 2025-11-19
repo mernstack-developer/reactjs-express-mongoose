@@ -76,8 +76,12 @@ export const toggleSectionVisibility = createAsyncThunk<any, { sectionId: string
   return response.data.data;
 });
 
-export const updateSectionDescription = createAsyncThunk<any, { sectionId: string; description: string; title?: string }>('courses/updateSectionDescription', async ({ sectionId, description, title }) => {
-  const response = await apiClient.put<ApiResponse<any>>(`/sections/${sectionId}`, { description, ...(title ? { title } : {}) });
+export const updateSectionDescription = createAsyncThunk<any, { sectionId: string; description: string; title?: string; media?: any }>('courses/updateSectionDescription', async ({ sectionId, description, title, media }) => {
+  const response = await apiClient.put<ApiResponse<any>>(`/sections/${sectionId}`, { 
+    description, 
+    ...(title ? { title } : {}), 
+    ...(media ? { media } : {})
+  });
   if (!response.data) throw new Error('Failed to update section description');
   return response.data.data;
 });

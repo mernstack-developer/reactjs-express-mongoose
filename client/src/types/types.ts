@@ -100,6 +100,12 @@ export interface CourseSection {
   _id: string;
   title: string;
   description?: string;
+  media?: {
+    type: 'video' | 'image';
+    url: string;
+    thumbnail?: string;
+    alt?: string;
+  };
   contents: ContentBlock[];
   activities?: any[];
 }
