@@ -1,5 +1,26 @@
 //type UserRole = "user" | "admin";
 
+export interface MenuItem {
+  _id: string;
+  name: string;
+  url?: string;
+  icon?: string;
+  parent?: string | null; // ID of parent menu item
+  order: number; // For sorting at the same level
+  children?: MenuItem[]; // Child menu items for tree structure
+  isActive?: boolean;
+  isExternal?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface MenuDragItem {
+  type: 'menu-item';
+  item: MenuItem;
+  sourceParentId?: string | null;
+  sourceIndex: number;
+}
+
 export interface Permission {
   _id: string;
   name: string;

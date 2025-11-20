@@ -29,4 +29,37 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+// Menu API functions
+export const menuApi = {
+  // Get all menu items
+  async getAllMenuItems() {
+    const response = await apiClient.get('/menu');
+    return response.data;
+  },
+
+  // Create new menu item
+  async createMenuItem(data: any) {
+    const response = await apiClient.post('/menu', data);
+    return response.data;
+  },
+
+  // Update menu item
+  async updateMenuItem(id: string, data: any) {
+    const response = await apiClient.put(`/menu/${id}`, data);
+    return response.data;
+  },
+
+  // Delete menu item
+  async deleteMenuItem(id: string) {
+    const response = await apiClient.delete(`/menu/${id}`);
+    return response.data;
+  },
+
+  // Reorder menu items
+  async reorderMenuItems(items: any[]) {
+    const response = await apiClient.post('/menu/reorder', { items });
+    return response.data;
+  }
+};
+
 export  {apiClient};

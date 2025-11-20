@@ -6,6 +6,8 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "seed": "node scripts/seedNotifications.js",
+    "seed-menu": "node scripts/seedMenuItems.js",
+    "seed-sections": "node scripts/seedSections.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

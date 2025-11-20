@@ -7,6 +7,7 @@ import userReducer from './features/auth/userSlice';
 import rolePermissionsReducer from './features/rolePermissions/rolePermissionsSlice';
 import categoriesReducer from './features/categories/categoriesSlice';
 import cartReducer from './features/cart/cartSlice';
+import menuReducer from './features/menu/menuSlice';
 
 export const store = configureStore({
   reducer: {
@@ -18,6 +19,7 @@ export const store = configureStore({
     categories: categoriesReducer,
     rolePermissions: rolePermissionsReducer,
     cart: cartReducer,
+    menu: menuReducer,
   },
 });
 

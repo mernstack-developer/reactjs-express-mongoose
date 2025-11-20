@@ -45,6 +45,8 @@ import UserManagement from "./pages/UserManagement";
 import UserEnrolledCourses from './pages/UserEnrolledCourses';
 import CourseEnrollments from './pages/CourseEnrollments';
 import UsersByRole from './pages/UsersByRole';
+import MenuManager from "./features/menu/MenuManager";
+import UserList from "./components/UserList";
 
 export default function App() {
   return (
@@ -78,7 +80,7 @@ export default function App() {
               <Route path="/checkout/success" element={<div>Payment Successful!</div>} />
               <Route path="/checkout/cancel" element={<div>Payment Cancelled!</div>} />
               <Route path="/blank" element={<Blank />} />
-
+  <Route path="/users-list" element={<UserList />} />
               {/* Admin Pages (Protected with /admin prefix) */}
               <Route path="/admin/dashboard" element={<Home />} />
               <Route path="/admin/users" element={<UserManagement />} />
@@ -95,7 +97,8 @@ export default function App() {
               <Route path="/admin/users/:userId/enrolled-courses" element={<UserEnrolledCourses />} />
               <Route path="/admin/courses/:courseId/enrollments" element={<CourseEnrollments />} />
               <Route path="/admin/roles/:roleId/users" element={<UsersByRole />} />
-            </Route>
+              <Route path="/admin/menu-management" element={<MenuManager />} />
+               </Route>
 
             {/* UI Component Pages (visible for testing) */}
             <Route path="/form-elements" element={<FormElements />} />

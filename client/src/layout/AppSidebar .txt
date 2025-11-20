@@ -18,10 +18,11 @@ import {
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import SidebarWidget from "./SidebarWidget";
+
 import MenuItem from '../components/Menu/MenuItem';
+import {  useAppSelector } from '../hooks';
 import { RootState } from '../../src/store';
-import { useAppDispatch, useAppSelector } from '../hooks';
-import { fetchMenuItems } from "../features/menu/menuSlice";
+
 
 type NavItem = {
   name: string;
@@ -91,19 +92,43 @@ const navItems: NavItem[] = [
   },
 ];
 
-
+const othersItems: NavItem[] = [
+  {
+    icon: <PieChartIcon />,
+    name: "Charts",
+    subItems: [
+      { name: "Line Chart", path: "/line-chart", pro: false },
+      { name: "Bar Chart", path: "/bar-chart", pro: false },
+    ],
+  },
+  {
+    icon: <BoxCubeIcon />,
+    name: "UI Elements",
+    subItems: [
+      { name: "Alerts", path: "/alerts", pro: false },
+      { name: "Avatar", path: "/avatars", pro: false },
+      { name: "Badge", path: "/badge", pro: false },
+      { name: "Buttons", path: "/buttons", pro: false },
+      { name: "Images", path: "/images", pro: false },
+      { name: "Videos", path: "/videos", pro: false },
+    ],
+  },
+  {
+    icon: <PlugInIcon />,
+    name: "Authentication",
+    subItems: [
+      { name: "Sign In", path: "/signin", pro: false },
+      { name: "Sign Up", path: "/signup", pro: false },
+    ],
+  },
+];
 
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const location = useLocation();
-    const dispatch = useAppDispatch(); 
  const menuItems = useAppSelector((state: RootState) => state.menu.menuItems);
   const menuStatus = useAppSelector((state: RootState) => state.menu.loading ? 'loading' : 'idle');
-  useEffect(() => {
-    if (menuStatus === 'idle') {
-      dispatch(fetchMenuItems());
-    }
-  }, [ dispatch]);
+
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";
     index: number;
@@ -120,7 +145,29 @@ const AppSidebar: React.FC = () => {
     [location.pathname]
   );
 
+  useEffect(() => {
+    let submenuMatched = false;
+    ["main", "others"].forEach((menuType) => {
+      const items = menuType === "main" ? navItems : othersItems;
+      items.forEach((nav, index) => {
+        if (nav.subItems) {
+          nav.subItems.forEach((subItem) => {
+            if (isActive(subItem.path)) {
+              setOpenSubmenu({
+                type: menuType as "main" | "others",
+                index,
+              });
+              submenuMatched = true;
+            }
+          });
+        }
+      });
+    });
 
+    if (!submenuMatched) {
+      setOpenSubmenu(null);
+    }
+  }, [location, isActive]);
 
   // Fetch categories to insert into the sidebar as a submenu
   useEffect(() => {
@@ -344,47 +391,15 @@ const AppSidebar: React.FC = () => {
         </Link>
       </div>
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
-        <nav className="mb-6">
-          <div className="flex flex-col gap-4">
-            <div>
-              <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-                  !isExpanded && !isHovered
-                    ? "lg:justify-center"
-                    : "justify-start"
-                }`}
-              >
-                {isExpanded || isHovered || isMobileOpen ? (
-                  "Menu"
-                ) : (
-                  <HorizontaLDots className="size-6" />
-                )}
-              </h2>
-                {renderMenuItems(navWithCats, "main")}
-            </div>
-            <div className="">
-              <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-                  !isExpanded && !isHovered
-                    ? "lg:justify-center"
-                    : "justify-start"
-                }`}
-              >
-                {isExpanded || isHovered || isMobileOpen ? (
-                  "Others"
-                ) : (
-                  <HorizontaLDots />
-                )}
-              </h2>
-              {menuItems && menuItems.length > 0 &&menuItems.map((menuItem)=><MenuItem key={menuItem._id} item={menuItem} />)}
 
-            </div>
-          </div>
-        </nav>
+                          {menuItems && menuItems.length > 0 &&menuItems.map((menuItem)=><MenuItem key={menuItem._id} item={menuItem} />)}
+    
         {isExpanded || isHovered || isMobileOpen ? <SidebarWidget /> : null}
       </div>
+
     </aside>
   );
+
 };
 
 export default AppSidebar;

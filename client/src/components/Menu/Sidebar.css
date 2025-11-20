@@ -1,0 +1,21 @@
+/* Sidebar.css */
+
+.sidebar ul {
+  list-style-type: none; /* Remove default bullet points */
+  padding-left: 0; /* Reset default padding */
+}
+
+/* Apply padding to nested ULs (submenus) */
+.sidebar li > ul {
+  padding-left: 20px; /* Indent sub-items */
+    margin-left: 10px; /* Aligns the vertical line with the parent */
+}
+
+.sidebar li {
+  padding: 8px 0;
+  cursor: pointer;
+}
+
+.sidebar li:hover {
+  background-color: #f0f0f0;
+}

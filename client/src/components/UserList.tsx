@@ -3,6 +3,7 @@ import { useAppDispatch, useAppSelector } from '../hooks';
 import { fetchUsers, deleteUser } from '../features/users/usersSlice';
 import EditUserForm from './EditUserForm';
 import { User } from '../types/types';
+import Sidebar from './Menu/Sidebar';
 //import ComponentCard from './common/ComponentCard';
 //import BasicTableOne from './tables/BasicTables/BasicTableOne';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from './ui/table';
@@ -36,7 +37,7 @@ const UserList: React.FC = () => {
 
   return (
     <div className="user-list">
-     
+       <Sidebar />
       {editingUser && (
         <div className="modal">
           <EditUserForm
@@ -46,6 +47,7 @@ const UserList: React.FC = () => {
         </div>
       )}
  <ComponentCard title="Users List">
+
       <Table>
         {/* Table Header */}
         <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">

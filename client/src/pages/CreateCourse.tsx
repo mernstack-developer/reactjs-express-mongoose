@@ -5,13 +5,13 @@ import { createCourse, updateCourse, fetchCourseById } from '../features/courses
 import PageBreadCrumb from '../components/common/PageBreadCrumb';
 import RichTextEditor from '../components/RichTextEditor/RichTextEditor';
 import '../components/RichTextEditor/RichTextEditor.css';
-import { uploadFileToServer } from '../utils/upload';
+//import { uploadFileToServer } from '../utils/upload';
 
 const CreateCourse: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { courseId } = useParams();
-  const { selectedCourse } = useAppSelector((state) => state.courses);
+  //const { selectedCourse } = useAppSelector((state) => state.courses);
   
   const isEdit = Boolean(courseId);
 
@@ -35,7 +35,7 @@ const CreateCourse: React.FC = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [imageUploading, setImageUploading] = useState(false);
+  //const [imageUploading, setImageUploading] = useState(false);
 
   // Load course data when editing
   useEffect(() => {

@@ -5,11 +5,14 @@ const PERMISSIONS = {
   DELETE_COURSE: 'delete_course',
   ENROLL_STUDENTS: 'enroll_students',
   SUBMIT_ASSIGNMENT: 'submit_assignment',
+  VIEW_MENU: 'view_menu',
+  EDIT_MENU: 'edit_menu',
+  DELETE_MENU: 'delete_menu',
 };
 
 const ROLES_MAP = {
   student: [PERMISSIONS.VIEW_COURSE, PERMISSIONS.SUBMIT_ASSIGNMENT],
-  instructor: [PERMISSIONS.VIEW_COURSE, PERMISSIONS.EDIT_COURSE, PERMISSIONS.ENROLL_STUDENTS],
+  instructor: [PERMISSIONS.VIEW_COURSE, PERMISSIONS.EDIT_COURSE, PERMISSIONS.ENROLL_STUDENTS, PERMISSIONS.VIEW_MENU],
   admin: Object.values(PERMISSIONS), // Admins have all permissions
   guest: [PERMISSIONS.VIEW_COURSE],
 };
