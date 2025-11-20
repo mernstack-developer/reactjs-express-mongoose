@@ -14,7 +14,7 @@ import {
     UserCircleIcon,
     UserIcon
 } from "../icons";
-import { Link, useLocation } from "react-router";
+import { Link, useLocation } from "react-router-dom";
 import { useSidebar } from '../../context/SidebarContext';
 
 interface MenuItemProps {
