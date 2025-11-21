@@ -56,7 +56,7 @@ const StudentAssignments: React.FC = () => {
       
       if (response.ok) {
         const data = await response.json();
-        setAssignments(data);
+        setAssignments(data.data || data);
       }
     } catch (err: any) {
       console.error('Error fetching assignments:', err);
@@ -74,6 +74,7 @@ const StudentAssignments: React.FC = () => {
   
 
   if (loading) {
+    console.log('Loading assignments...');
     return (
       <div className="space-y-6">
         <div className="animate-pulse">
@@ -90,7 +91,7 @@ const StudentAssignments: React.FC = () => {
       </div>
     );
   }
-
+console.log('Assignments loaded:', assignments);
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -136,7 +137,8 @@ const StudentAssignments: React.FC = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {assignments.map((assignment) => {
+              {assignments?.map((assignment) => {
+                <h1>{assignment._id}</h1>
                 const status = getAssignmentStatus(assignment);
                 const isOverdue = new Date() > new Date(assignment.dueDate);
                 
@@ -146,11 +148,11 @@ const StudentAssignments: React.FC = () => {
                   <div key={assignment._id} className="bg-white rounded-lg shadow p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 mb-2">{assignment.title}</h3>
-                        <p className="text-gray-600 text-sm mb-2">{assignment.description}</p>
+                        <h3 className="font-semibold text-gray-900 mb-2">{assignment?.title}</h3>
+                        <p className="text-gray-600 text-sm mb-2">{assignment?.description}</p>
                         <div className="space-y-1">
-                          <p className="text-sm text-gray-500">Course: {assignment.course.title}</p>
-                          <p className="text-sm text-gray-500">Section: {assignment.section.title}</p>
+                          <p className="text-sm text-gray-500">Course: {assignment?.course?.title}</p>
+                          <p className="text-sm text-gray-500">Section: {assignment?.section?.title}</p>
                           <p className={`text-sm font-medium ${
                             isOverdue ? 'text-red-600' : 'text-gray-500'
                           }`}>

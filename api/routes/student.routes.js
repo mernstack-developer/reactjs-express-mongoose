@@ -20,5 +20,5 @@ router.post('/progress/section/:sectionId', authMiddleware, studentController.up
 router.get('/analytics/progress', authMiddleware, studentController.getProgressAnalytics);
 router.get('/analytics/time-spent', authMiddleware, studentController.getTimeSpentAnalytics);
 router.get('/analytics/completion-rate', authMiddleware, studentController.getCompletionRateAnalytics);
-
+router.get('/assignments', authMiddleware, studentController.getAssignments);
 module.exports = router;

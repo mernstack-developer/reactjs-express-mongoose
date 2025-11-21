@@ -4,7 +4,7 @@ const Section = require('../models/section.model');
 const Certificate = require('../models/certificate.model');
 const { SectionProgress } = require('../models/section.model');
 const User = require('../models/user.model');
-
+const userService = require('../services/user.service');
 // Get student dashboard data
 async function getDashboardData(req, res) {
   try {
@@ -429,6 +429,17 @@ module.exports = {
   getCertificates: async (req, res) => {
     const certificates = await getCertificatesForUser(req.user.id);
     res.json({ success: true, data: certificates });
+  },
+  getAssignments: async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const assignments = await userService.getAssignmentsForUser(userId);
+      
+      res.json({ success: true, data: assignments });
+    } catch (error) {
+      console.error('Get assignments error:', error);
+      res.status(500).json({ success: false, message: error.message });
+    }
   },
   getCourseProgress,
   getSectionProgress,

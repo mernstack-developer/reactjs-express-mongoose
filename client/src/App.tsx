@@ -84,7 +84,8 @@ export default function App() {
               <Route path="/checkout/success" element={<div>Payment Successful!</div>} />
               <Route path="/checkout/cancel" element={<div>Payment Cancelled!</div>} />
               <Route path="/blank" element={<Blank />} />
-  <Route path="/users-list" element={<UserList />} />
+               <Route path="/users-list" element={<UserList />} />
+               <Route path="/student/assignments" element={<StudentAssignments />} />
               {/* Admin Pages (Protected with /admin prefix) */}
               <Route path="/admin/dashboard" element={<Home />} />
               <Route path="/admin/users" element={<UserManagement />} />
