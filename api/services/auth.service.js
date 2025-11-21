@@ -35,8 +35,8 @@ async function loginUser({ email, password }) {
   const token = jwt.sign(payload, process.env.JWT_SECRET || 'secret', { expiresIn: '7d' });
   return { user, token };
 }
-async function getProfile({ email }) {
-    const user = await User.findOne({ email})
+async function getProfile(userId) {
+    const user = await User.findById(userId)
       // Populate the 'role' field
       .populate({
         path: 'role',
@@ -48,6 +48,7 @@ async function getProfile({ email }) {
       })
       .exec(); 
 
+  if (!user) throw new Error('User not found');
   return { user };
 }
 async function checkAuth(id) {
@@ -55,8 +56,6 @@ async function checkAuth(id) {
     const isAuthenticated = !!user;
     return { isAuthenticated,user };
 }
-module.exports = { registerUser, loginUser ,getProfile, checkAuth };  
-
 async function updateProfile(userId, data) {
   // Only allow certain fields to be updated by the user
   const allowed = [
@@ -72,4 +71,4 @@ async function updateProfile(userId, data) {
   return user;
 }
 
-module.exports = { registerUser, loginUser ,getProfile, checkAuth, updateProfile };  
+module.exports = { registerUser, loginUser, getProfile, checkAuth, updateProfile };  

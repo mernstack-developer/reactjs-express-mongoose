@@ -297,9 +297,407 @@ const initiateRefund = async (req, res) => {
   }
 };
 
+// Admin methods for payment management
+
+// Get all payments (Admin)
+const getPayments = async (req, res) => {
+  try {
+    const Payment = require('../models/payment.model');
+    const { status, userId, courseId, startDate, endDate, page = 1, limit = 10 } = req.query;
+    
+    const query = {};
+    
+    if (status) query.status = status;
+    if (userId) query.userId = userId;
+    if (courseId) query.courseId = courseId;
+    
+    // Date filtering
+    if (startDate || endDate) {
+      query.createdAt = {};
+      if (startDate) query.createdAt.$gte = new Date(startDate);
+      if (endDate) query.createdAt.$lte = new Date(endDate);
+    }
+    
+    const payments = await Payment.find(query)
+      .populate('userId', 'firstname lastname email')
+      .populate('courseId', 'title instructor')
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+    
+    const total = await Payment.countDocuments(query);
+    
+    res.json({
+      success: true,
+      data: payments,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Get payments error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Get payment by ID (Admin)
+const getPaymentById = async (req, res) => {
+  try {
+    const Payment = require('../models/payment.model');
+    const { paymentId } = req.params;
+    
+    const payment = await Payment.findById(paymentId)
+      .populate('userId', 'firstname lastname email')
+      .populate('courseId', 'title instructor createdBy')
+      .populate('enrollmentId');
+    
+    if (!payment) {
+      return res.status(404).json({ success: false, message: 'Payment not found' });
+    }
+    
+    res.json({ success: true, data: payment });
+  } catch (error) {
+    console.error('Get payment by ID error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Update payment status (Admin)
+const updatePaymentStatus = async (req, res) => {
+  try {
+    const Payment = require('../models/payment.model');
+    const { paymentId } = req.params;
+    const { status, reason } = req.body;
+    
+    const validStatuses = ['pending', 'completed', 'failed', 'refunded', 'cancelled', 'disputed'];
+    
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid payment status' });
+    }
+    
+    const payment = await Payment.findByIdAndUpdate(
+      paymentId,
+      { 
+        status,
+        'metadata.statusChangeReason': reason,
+        'metadata.statusChangedBy': req.user.id,
+        'metadata.statusChangedAt': new Date()
+      },
+      { new: true }
+    )
+    .populate('userId', 'firstname lastname email')
+    .populate('courseId', 'title');
+    
+    if (!payment) {
+      return res.status(404).json({ success: false, message: 'Payment not found' });
+    }
+    
+    res.json({ success: true, data: payment });
+  } catch (error) {
+    console.error('Update payment status error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Process refund (Admin)
+const refundPayment = async (req, res) => {
+  try {
+    const Payment = require('../models/payment.model');
+    const { paymentId } = req.params;
+    const { amount, reason } = req.body;
+    
+    const payment = await Payment.findById(paymentId);
+    
+    if (!payment) {
+      return res.status(404).json({ success: false, message: 'Payment not found' });
+    }
+    
+    if (payment.status !== 'completed') {
+      return res.status(400).json({ success: false, message: 'Only completed payments can be refunded' });
+    }
+    
+    const refundAmount = amount || payment.amount;
+    
+    if (refundAmount > payment.amount - payment.refundedAmount) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Refund amount exceeds available balance' 
+      });
+    }
+    
+    // Update payment with refund information
+    payment.refundedAmount += refundAmount;
+    payment.refundReason = reason;
+    payment.refundedAt = new Date();
+    
+    if (payment.refundedAmount >= payment.amount) {
+      payment.status = 'refunded';
+    }
+    
+    await payment.save();
+    
+    res.json({ success: true, data: payment });
+  } catch (error) {
+    console.error('Refund payment error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Get payouts (Admin)
+const getPayouts = async (req, res) => {
+  try {
+    const Payment = require('../models/payment.model');
+    const Course = require('../models/course.model');
+    
+    const { instructorId, status, startDate, endDate } = req.query;
+    
+    const matchStage = { status: 'completed' };
+    
+    if (instructorId) {
+      matchStage['courseId.createdBy'] = instructorId;
+    }
+    
+    if (startDate || endDate) {
+      matchStage.createdAt = {};
+      if (startDate) matchStage.createdAt.$gte = new Date(startDate);
+      if (endDate) matchStage.createdAt.$lte = new Date(endDate);
+    }
+    
+    const payouts = await Payment.aggregate([
+      {
+        $lookup: {
+          from: 'courses',
+          localField: 'courseId',
+          foreignField: '_id',
+          as: 'course'
+        }
+      },
+      { $unwind: '$course' },
+      { $match: matchStage },
+      {
+        $group: {
+          _id: '$course.createdBy',
+          totalPayout: { $sum: '$instructorShare' },
+          totalPlatformFees: { $sum: '$platformFee' },
+          transactionCount: { $sum: 1 },
+          courses: { $addToSet: '$courseId' }
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'instructor'
+        }
+      },
+      { $unwind: '$instructor' }
+    ]);
+    
+    res.json({ success: true, data: payouts });
+  } catch (error) {
+    console.error('Get payouts error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Get revenue report (Admin)
+const getRevenueReport = async (req, res) => {
+  try {
+    const Payment = require('../models/payment.model');
+    
+    const { startDate, endDate, groupBy = 'day' } = req.query;
+    
+    const matchStage = { status: 'completed' };
+    
+    if (startDate || endDate) {
+      matchStage.createdAt = {};
+      if (startDate) matchStage.createdAt.$gte = new Date(startDate);
+      if (endDate) matchStage.createdAt.$lte = new Date(endDate);
+    }
+    
+    let dateString;
+    switch (groupBy) {
+      case 'month':
+        dateString = '%Y-%m';
+        break;
+      case 'year':
+        dateString = '%Y';
+        break;
+      default:
+        dateString = '%Y-%m-%d';
+    }
+    
+    const revenueData = await Payment.aggregate([
+      { $match: matchStage },
+      {
+        $group: {
+          _id: {
+            $dateToString: {
+              format: dateString,
+              date: '$createdAt'
+            }
+          },
+          revenue: { $sum: '$amount' },
+          platformFees: { $sum: '$platformFee' },
+          instructorPayouts: { $sum: '$instructorShare' },
+          transactionCount: { $sum: 1 },
+          averageTransaction: { $avg: '$amount' }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+    
+    // Calculate totals
+    const totals = await Payment.aggregate([
+      { $match: matchStage },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: '$amount' },
+          totalPlatformFees: { $sum: '$platformFee' },
+          totalInstructorPayouts: { $sum: '$instructorShare' },
+          totalTransactions: { $sum: 1 }
+        }
+      }
+    ]);
+    
+    res.json({
+      success: true,
+      data: {
+        timeline: revenueData,
+        totals: totals[0] || {
+          totalRevenue: 0,
+          totalPlatformFees: 0,
+          totalInstructorPayouts: 0,
+          totalTransactions: 0
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Get revenue report error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Get financial reports (Admin)
+const getFinancialReports = async (req, res) => {
+  try {
+    const Payment = require('../models/payment.model');
+    const { startDate, endDate, reportType = 'summary' } = req.query;
+    
+    const matchStage = { status: 'completed' };
+    
+    if (startDate || endDate) {
+      matchStage.createdAt = {};
+      if (startDate) matchStage.createdAt.$gte = new Date(startDate);
+      if (endDate) matchStage.createdAt.$lte = new Date(endDate);
+    }
+    
+    let reportData;
+    
+    if (reportType === 'summary') {
+      // Summary report
+      reportData = await Payment.aggregate([
+        { $match: matchStage },
+        {
+          $group: {
+            _id: null,
+            totalRevenue: { $sum: '$amount' },
+            totalFees: { $sum: '$platformFee' },
+            totalPayouts: { $sum: '$instructorShare' },
+            transactionCount: { $sum: 1 },
+            averageTransaction: { $avg: '$amount' },
+            successfulTransactions: { 
+              $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] } 
+            }
+          }
+        }
+      ]);
+    } else if (reportType === 'by_course') {
+      // Revenue by course
+      reportData = await Payment.aggregate([
+        { $match: matchStage },
+        {
+          $lookup: {
+            from: 'courses',
+            localField: 'courseId',
+            foreignField: '_id',
+            as: 'course'
+          }
+        },
+        { $unwind: '$course' },
+        {
+          $group: {
+            _id: {
+              courseId: '$courseId',
+              courseTitle: '$course.title'
+            },
+            revenue: { $sum: '$amount' },
+            transactionCount: { $sum: 1 },
+            averageTransaction: { $avg: '$amount' }
+          }
+        },
+        { $sort: { revenue: -1 } }
+      ]);
+    } else if (reportType === 'by_instructor') {
+      // Revenue by instructor
+      reportData = await Payment.aggregate([
+        { $match: matchStage },
+        {
+          $lookup: {
+            from: 'courses',
+            localField: 'courseId',
+            foreignField: '_id',
+            as: 'course'
+          }
+        },
+        { $unwind: '$course' },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'course.createdBy',
+            foreignField: '_id',
+            as: 'instructor'
+          }
+        },
+        { $unwind: '$instructor' },
+        {
+          $group: {
+            _id: {
+              instructorId: '$course.createdBy',
+              instructorName: { $concat: ['$instructor.firstname', ' ', '$instructor.lastname'] }
+            },
+            revenue: { $sum: '$instructorShare' },
+            platformFees: { $sum: '$platformFee' },
+            transactionCount: { $sum: 1 }
+          }
+        },
+        { $sort: { revenue: -1 } }
+      ]);
+    }
+    
+    res.json({ success: true, data: reportData });
+  } catch (error) {
+    console.error('Get financial reports error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   createPaymentIntent,
   verifyPayment,
   getPaymentStatus,
-  initiateRefund
+  initiateRefund,
+  // Admin methods
+  getPayments,
+  getPaymentById,
+  updatePaymentStatus,
+  refundPayment,
+  getPayouts,
+  getRevenueReport,
+  getFinancialReports
 };

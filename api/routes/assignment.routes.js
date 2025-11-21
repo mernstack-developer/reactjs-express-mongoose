@@ -9,8 +9,12 @@ router.post('/', authMiddleware, assignmentController.createAssignment);
 router.post('/create-activity', authMiddleware, assignmentController.createAssignmentActivity);
 // Get assignment details
 router.get('/:id', authMiddleware, assignmentController.getAssignment);
+// Get student's submission for an assignment
+router.get('/:id/submission', authMiddleware, assignmentController.getStudentSubmission);
 // Submit assignment
 router.post('/:id/submit', authMiddleware, assignmentController.submitAssignment);
+// Save assignment as draft
+router.post('/:id/save-draft', authMiddleware, assignmentController.saveDraft);
 // List submissions
 router.get('/:id/submissions', authMiddleware, assignmentController.listSubmissions);
 // Grade a submission

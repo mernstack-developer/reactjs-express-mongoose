@@ -12,7 +12,7 @@ export default function UserDropdown() {
   //const { logout } = useAuth();
   const dispatch = useAppDispatch();
   const { isAuthenticated, data:user} = useAppSelector((state: RootState) => state.user);
-console.log("isAuthenticated",isAuthenticated)
+
   const navigate = useNavigate();
   function toggleDropdown() {
     setIsOpen(!isOpen);

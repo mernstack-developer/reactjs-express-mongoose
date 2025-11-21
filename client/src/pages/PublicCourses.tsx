@@ -5,6 +5,7 @@ import { fetchPublicCourses, enrollInCourse } from '../features/courses/coursesS
 import { addToCart, fetchCart } from '../features/cart/cartSlice';
 import PageBreadCrumb from '../components/common/PageBreadCrumb';
 import type { Course } from '../types/types';
+import { is } from 'zod/v4/locales';
 
 interface PaginationState {
   currentPage: number;
@@ -133,7 +134,7 @@ export default function PublicCourses() {
 
   const isEnrolled = (course: Course) => {
     if (!user) return false;
-    return course.registeredUsers?.includes(user._id);
+    return course.registeredUsers?.includes(user?._id);
   };
 
   if (loading) {
@@ -225,6 +226,7 @@ export default function PublicCourses() {
             </p>
           </div>
         ) : (
+          
           <>
             {/* Results Count */}
             <div className="mb-6 text-sm text-gray-600 dark:text-gray-400">
@@ -235,10 +237,12 @@ export default function PublicCourses() {
             {/* Courses Grid */}
             <div className="mb-8 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {displayedCourses.map(course => (
+                
                 <div
                   key={course._id}
                   className="overflow-hidden rounded-lg bg-white shadow-sm transition-shadow hover:shadow-md dark:bg-gray-800"
                 >
+               
                   {/* Course Image */}
                   {course.imageUrl && (
                     <div className="relative h-48 w-full overflow-hidden bg-gray-200 dark:bg-gray-700">
@@ -254,7 +258,7 @@ export default function PublicCourses() {
                   <div className="p-6">
                     {/* Title */}
                     <h3 className="mb-2 line-clamp-2 text-lg font-semibold text-gray-900 dark:text-white">
-                      {course.title}
+                      {course.title}{!!course.registeredUsers?.includes(user?._id)  }
                     </h3>
 
                     {/* Description */}
@@ -316,6 +320,7 @@ export default function PublicCourses() {
                     </div>
 
                     {/* Button */}
+                    
                     <button
                       onClick={() => {
                         if (course.enrollmentType === 'paid') {
@@ -331,6 +336,7 @@ export default function PublicCourses() {
                       className="w-full rounded-lg bg-blue-600 px-4 py-2 text-center font-medium text-white transition-colors hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed dark:bg-blue-500 dark:hover:bg-blue-600"
                     >
                       {isEnrolled(course) ? (
+                        console.log('isEnrolled',isEnrolled(course)),
                         '✓ Enrolled'
                       ) : enrollingCourseId === course._id ? (
                         <span className="flex items-center justify-center gap-2">

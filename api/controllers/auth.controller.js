@@ -39,7 +39,11 @@ async function checkAuthStatus(req, res) {
 }
 async function fetchProfile(req, res) {
   try {
-    const { user } = await authService.getProfile(req.body);
+    // Get user ID from auth middleware
+    const userId = req.user && req.user.id;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+    
+    const { user } = await authService.getProfile(userId);
     res.json({ user });
   } catch (err) {
     console.error(err);

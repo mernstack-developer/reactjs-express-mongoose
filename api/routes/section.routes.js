@@ -23,4 +23,20 @@ router.post('/:id/duplicate',  authMiddleware, authorize(['admin']),  sectionCon
 // Reorder sections within a course
 router.post('/course/:courseId/reorder',  authMiddleware, authorize(['admin']),  sectionController.reorderSections);
 
+// Section Progress Tracking Routes
+// Get section progress for current user
+router.get('/:id/progress', authMiddleware, sectionController.getSectionProgress);
+
+// Update section progress (single update)
+router.post('/:id/progress', authMiddleware, sectionController.updateSectionProgress);
+
+// Update section progress (batch updates)
+router.post('/:id/progress/batch', authMiddleware, sectionController.updateSectionProgressBatch);
+
+// Get section progress logs
+router.get('/:id/progress/logs', authMiddleware, sectionController.getSectionProgressLogs);
+
+// Get section analytics (for admin/instructor)
+router.get('/:id/analytics', authMiddleware, authorize(['admin', 'instructor']), sectionController.getSectionAnalytics);
+
 module.exports = router;

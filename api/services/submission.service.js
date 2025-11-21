@@ -17,4 +17,14 @@ async function gradeSubmission(id, grade, feedback) {
   return await Submission.findByIdAndUpdate(id, { graded: true, grade, feedback }, { new: true }).lean();
 }
 
-module.exports = { createSubmission, getSubmissionsForAssignment, getSubmissionById, gradeSubmission };
+async function getStudentSubmission(assignmentId, studentId) {
+  return await Submission.findOne({ assignment: assignmentId, student: studentId }).lean();
+}
+
+module.exports = { 
+  createSubmission, 
+  getSubmissionsForAssignment, 
+  getSubmissionById, 
+  gradeSubmission,
+  getStudentSubmission
+};

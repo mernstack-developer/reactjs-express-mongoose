@@ -40,6 +40,13 @@ export const deleteCategory = createAsyncThunk<any, string>('categories/deleteCa
   return { id };
 });
 
+export const updateCategory = createAsyncThunk<any, { id: string; name: string; parent?: string | null }>('categories/updateCategory', async (payload) => {
+  const { id, ...data } = payload;
+  const res = await apiClient.put<ApiResponse<any>>(`/categories/${id}`, data);
+  if (!res.data) throw new Error('Failed to update category');
+  return res.data.data;
+});
+
 const categoriesSlice = createSlice({
   name: 'categories',
   initialState,
@@ -57,7 +64,16 @@ const categoriesSlice = createSlice({
       .addCase(createCategory.rejected, (state, action) => { state.loading = false; state.error = action.error.message || 'Failed to create category'; })
       .addCase(deleteCategory.pending, (state) => { state.loading = true; state.error = null; })
       .addCase(deleteCategory.fulfilled, (state, action) => { state.loading = false; state.data = state.data.filter(c => c._id !== action.payload.id); })
-      .addCase(deleteCategory.rejected, (state, action) => { state.loading = false; state.error = action.error.message || 'Failed to delete category'; });
+      .addCase(deleteCategory.rejected, (state, action) => { state.loading = false; state.error = action.error.message || 'Failed to delete category'; })
+      .addCase(updateCategory.pending, (state) => { state.loading = true; state.error = null; })
+      .addCase(updateCategory.fulfilled, (state, action) => { 
+        state.loading = false; 
+        const index = state.data.findIndex(c => c._id === action.payload._id);
+        if (index !== -1) {
+          state.data[index] = action.payload;
+        }
+      })
+      .addCase(updateCategory.rejected, (state, action) => { state.loading = false; state.error = action.error.message || 'Failed to update category'; });
   }
 });
 

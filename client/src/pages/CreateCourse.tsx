@@ -6,15 +6,19 @@ import PageBreadCrumb from '../components/common/PageBreadCrumb';
 import RichTextEditor from '../components/RichTextEditor/RichTextEditor';
 import '../components/RichTextEditor/RichTextEditor.css';
 //import { uploadFileToServer } from '../utils/upload';
-
+import type { Category } from '../types/types';
+import { fetchCategories } from '../features/categories/categoriesSlice';
 const CreateCourse: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { courseId } = useParams();
   //const { selectedCourse } = useAppSelector((state) => state.courses);
-  
+    const categories = useAppSelector((state: any) => state.categories?.data as Category[] || []);
+  console.log('Categories loaded:', categories);
   const isEdit = Boolean(courseId);
-
+  useEffect(() => { 
+    dispatch(fetchCategories()); 
+  }, [dispatch]);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -366,6 +370,12 @@ const CreateCourse: React.FC = () => {
                       className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     >
                       <option value="">Select a category (optional)</option>
+                      {categories.map(category => (
+                        <option key={category._id} value={category._id}>
+                          {category.name}
+                        </option>
+                      ))}
+                      {/* 
                       <option value="programming">Programming</option>
                       <option value="web-development">Web Development</option>
                       <option value="data-science">Data Science</option>
@@ -373,7 +383,7 @@ const CreateCourse: React.FC = () => {
                       <option value="cloud-computing">Cloud Computing</option>
                       <option value="devops">DevOps</option>
                       <option value="design">Design</option>
-                      <option value="business">Business</option>
+                      <option value="business">Business</option> */}
                     </select>
                   </div>
 

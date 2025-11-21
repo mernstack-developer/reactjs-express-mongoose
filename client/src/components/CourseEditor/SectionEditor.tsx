@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAppDispatch } from '../../hooks';
+import { Plus } from 'lucide-react';
 import {
   toggleSectionVisibility,
   updateSectionDescription,
@@ -7,6 +8,7 @@ import {
   duplicateSection,
 } from '../../features/courses/coursesSlice';
 import ActivityEditor from './ActivityEditor';
+import CreateActivityModal from './CreateActivityModal';
 import RichTextEditor from '../RichTextEditor/RichTextEditor';
 import RichTextRenderer from '../RichTextRenderer/RichTextRenderer';
 
@@ -27,6 +29,7 @@ const SectionEditor: React.FC<SectionEditorProps> = ({ section, courseId, sectio
   const [mediaUrl, setMediaUrl] = useState(section.media?.url || '');
   const [mediaThumbnail, setMediaThumbnail] = useState(section.media?.thumbnail || '');
   const [mediaAlt, setMediaAlt] = useState(section.media?.alt || '');
+  const [showCreateActivityModal, setShowCreateActivityModal] = useState(false);
 
   const handleToggleVisibility = async () => {
     try {
@@ -318,7 +321,16 @@ const SectionEditor: React.FC<SectionEditorProps> = ({ section, courseId, sectio
 
           {/* Activities Section */}
           <div className="mt-4">
-            <h4 className="text-md font-semibold text-gray-900 dark:text-white mb-3">Activities & Resources</h4>
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-md font-semibold text-gray-900 dark:text-white">Activities & Resources</h4>
+              <button
+                onClick={() => setShowCreateActivityModal(true)}
+                className="flex items-center space-x-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Create Activity</span>
+              </button>
+            </div>
             {section.activities && section.activities.length > 0 ? (
               <div className="space-y-2">
                 {section.activities.map((activity: any, idx: number) => (
@@ -333,9 +345,27 @@ const SectionEditor: React.FC<SectionEditorProps> = ({ section, courseId, sectio
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500 dark:text-gray-400 italic text-sm">No activities in this section.</p>
+              <div className="text-center py-4">
+                <p className="text-gray-500 dark:text-gray-400 italic text-sm mb-4">No activities in this section.</p>
+                <button
+                  onClick={() => setShowCreateActivityModal(true)}
+                  className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Create Your First Activity</span>
+                </button>
+              </div>
             )}
           </div>
+
+          {/* Create Activity Modal */}
+          <CreateActivityModal
+            isOpen={showCreateActivityModal}
+            onClose={() => setShowCreateActivityModal(false)}
+            sectionId={section._id}
+            courseId={courseId}
+            onActivityCreated={onRefresh}
+          />
         </div>
       )}
     </div>

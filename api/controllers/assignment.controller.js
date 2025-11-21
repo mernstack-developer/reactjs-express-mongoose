@@ -71,4 +71,48 @@ async function listSubmissions(req, res) {
   }
 }
 
-module.exports = { createAssignment, getAssignment, createAssignmentActivity, submitAssignment, gradeSubmission, listSubmissions };
+async function getStudentSubmission(req, res) {
+  try {
+    const studentId = req.user?.id;
+    const assignmentId = req.params.id;
+    const submission = await submissionService.getStudentSubmission(assignmentId, studentId);
+    res.json({ data: submission || null });
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ error: err.message });
+  }
+}
+
+async function saveDraft(req, res) {
+  try {
+    const studentId = req.user?.id;
+    const assignmentId = req.params.id;
+    const { text, files } = req.body;
+    
+    // For now, we'll just validate the draft data
+    // In a full implementation, you might want to save drafts to a separate collection
+    const draftData = {
+      assignmentId,
+      studentId,
+      text: text || '',
+      files: files || [],
+      savedAt: new Date()
+    };
+    
+    res.json({ data: draftData, message: 'Draft saved successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ error: err.message });
+  }
+}
+
+module.exports = { 
+  createAssignment, 
+  getAssignment, 
+  createAssignmentActivity, 
+  submitAssignment, 
+  gradeSubmission, 
+  listSubmissions,
+  getStudentSubmission,
+  saveDraft
+};

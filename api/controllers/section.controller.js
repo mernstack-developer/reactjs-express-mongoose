@@ -1,5 +1,6 @@
 const sectionService = require('../services/section.service');
 const courseService = require('../services/course.service');
+const { Section, SectionProgress } = require('../models/section.model');
 
 async function createSection(req, res) {
     try {
@@ -70,6 +71,169 @@ async function duplicateSection(req, res) {
     }
 }
 
+// Section Progress Tracking Methods
+
+async function getSectionProgress(req, res) {
+    try {
+        const { id: sectionId } = req.params;
+        const userId = req.user.id;
+        
+        const progress = await Section.getProgressForUser(sectionId, userId);
+        
+        res.json({ 
+            success: true, 
+            data: progress || {
+                sectionId,
+                userId,
+                timeSpent: 0,
+                durationWatched: 0,
+                completionPercentage: 0,
+                isCompleted: false,
+                progressLogs: []
+            }
+        });
+    } catch (error) {
+        console.error('Get section progress error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+async function updateSectionProgress(req, res) {
+    try {
+        const { id: sectionId } = req.params;
+        const userId = req.user.id;
+        const { timeSpent = 0, durationWatched = 0 } = req.body;
+        
+        const progress = await Section.updateProgress(sectionId, userId, timeSpent, durationWatched);
+        
+        res.json({ 
+            success: true, 
+            data: progress 
+        });
+    } catch (error) {
+        console.error('Update section progress error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+async function updateSectionProgressBatch(req, res) {
+    try {
+        const { id: sectionId } = req.params;
+        const userId = req.user.id;
+        const { progressUpdates = [] } = req.body;
+        
+        // Process multiple progress updates
+        const results = [];
+        let totalTimeSpent = 0;
+        let totalDurationWatched = 0;
+        
+        for (const update of progressUpdates) {
+            const { timeSpent = 0, durationWatched = 0 } = update;
+            totalTimeSpent += timeSpent;
+            totalDurationWatched += durationWatched;
+        }
+        
+        // Update progress with accumulated values
+        const progress = await Section.updateProgress(
+            sectionId, 
+            userId, 
+            totalTimeSpent, 
+            totalDurationWatched
+        );
+        
+        res.json({ 
+            success: true, 
+            data: progress 
+        });
+    } catch (error) {
+        console.error('Batch update section progress error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+async function getSectionProgressLogs(req, res) {
+    try {
+        const { id: sectionId } = req.params;
+        const userId = req.user.id;
+        
+        const progress = await SectionProgress.findOne({ 
+            sectionId, 
+            userId 
+        }).sort({ lastActivityAt: -1 });
+        
+        if (!progress) {
+            return res.json({ 
+                success: true, 
+                data: { 
+                    progressLogs: [],
+                    totalTimeSpent: 0,
+                    totalDurationWatched: 0,
+                    completionPercentage: 0
+                } 
+            });
+        }
+        
+        res.json({ 
+            success: true, 
+            data: { 
+                progressLogs: progress.progressLogs,
+                totalTimeSpent: progress.timeSpent,
+                totalDurationWatched: progress.durationWatched,
+                completionPercentage: progress.completionPercentage,
+                isCompleted: progress.isCompleted
+            }
+        });
+    } catch (error) {
+        console.error('Get section progress logs error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+async function getSectionAnalytics(req, res) {
+    try {
+        const { id: sectionId } = req.params;
+        
+        // Get section analytics
+        const section = await Section.findById(sectionId);
+        if (!section) {
+            return res.status(404).json({ success: false, message: 'Section not found' });
+        }
+        
+        const progressStats = await SectionProgress.aggregate([
+            { $match: { sectionId: section._id } },
+            {
+                $group: {
+                    _id: null,
+                    totalUsers: { $sum: 1 },
+                    completedUsers: { $sum: { $cond: [{ $eq: ['$isCompleted', true] }, 1, 0] } },
+                    avgTimeSpent: { $avg: '$timeSpent' },
+                    avgCompletionPercentage: { $avg: '$completionPercentage' },
+                    totalViews: { $sum: '$timeSpent' }
+                }
+            }
+        ]);
+        
+        const analytics = {
+            sectionTitle: section.title,
+            estimatedDuration: section.estimatedDuration,
+            totalUsersInProgress: progressStats[0]?.totalUsers || 0,
+            completionRate: progressStats[0] ? 
+                Math.round((progressStats[0].completedUsers / progressStats[0].totalUsers) * 100) : 0,
+            averageTimeSpent: Math.round(progressStats[0]?.avgTimeSpent || 0),
+            averageCompletionPercentage: Math.round(progressStats[0]?.avgCompletionPercentage || 0),
+            totalViews: progressStats[0]?.totalViews || 0
+        };
+        
+        res.json({ 
+            success: true, 
+            data: analytics 
+        });
+    } catch (error) {
+        console.error('Get section analytics error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
+
 module.exports = {
     createSection,
     getSection,
@@ -77,4 +241,9 @@ module.exports = {
     deleteSection,
     reorderSections,
     duplicateSection,
+    getSectionProgress,
+    updateSectionProgress,
+    updateSectionProgressBatch,
+    getSectionProgressLogs,
+    getSectionAnalytics
 };

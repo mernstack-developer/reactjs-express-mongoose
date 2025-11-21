@@ -47,6 +47,9 @@ import CourseEnrollments from './pages/CourseEnrollments';
 import UsersByRole from './pages/UsersByRole';
 import MenuManager from "./features/menu/MenuManager";
 import UserList from "./components/UserList";
+import StudentAssignments from "./pages/StudentAssignments";
+import InstructorAssignments from "./pages/InstructorAssignments";
+import Dashboard from "./pages/Dashboard";
 
 export default function App() {
   return (
@@ -56,23 +59,24 @@ export default function App() {
         <Routes>
           {/* Public Front-End Pages */}
           <Route element={<FrontPageLayout />}>
-            <Route index path="/" element={<Courses />} />
-            <Route path="/about" element={<AboutUs />} />
+              <Route path="/about" element={<AboutUs />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/courses/:id" element={<CourseDetail />} />
-            <Route path="/public-courses" element={<PublicCourses />} />
           </Route>
 
           {/* Student & Admin Dashboard Layout */}
           <Route element={<AppLayout />}>
+           <Route index path="/" element={<Dashboard />} />
+         
+            <Route path="/courses/:id" element={<CourseDetail />} />
+            <Route path="/public-courses" element={<PublicCourses />} />
             <Route element={<PrivateRoute />}>
               {/* Student Pages */}
-              <Route path="/dashboard" element={<Home />} />
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/my-courses" element={<StudentCourses />} />
               <Route path="/courses/view/:id" element={<StudentCourseDetail />} />
-                <Route path="/categories" element={<CategoriesPage />} />
-                <Route path="/categories/:id" element={<CategoryDetail />} />
+                
               <Route path="/profile" element={<UserProfiles />} />
+              <Route path="/assignments" element={<InstructorAssignments />} />
               <Route path="/assignments/:id" element={<AssignmentPage />} />
               <Route path="/calendar" element={<Calendar />} />
               <Route path="/cart" element={<CartPage />} />
@@ -93,6 +97,8 @@ export default function App() {
               <Route path="/admin/courses" element={<CourseManagement />} />
               <Route path="/admin/courses/create" element={<CreateCourse />} />
               <Route path="/admin/courses/:id/editor" element={<CourseEditor />} />
+              <Route path="/admin/categories-list" element={<CategoriesPage />} />
+                <Route path="/admin/categories/:id" element={<CategoryDetail />} />
               <Route path="/admin/categories" element={<AdminCategories />} />
               <Route path="/admin/users/:userId/enrolled-courses" element={<UserEnrolledCourses />} />
               <Route path="/admin/courses/:courseId/enrollments" element={<CourseEnrollments />} />
